@@ -49,7 +49,7 @@ class CalcInput extends StatelessWidget {
       inputComps.add(SizedBox(
           width: 300,
           child: TextFormField(
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
               controller: inputController,
               decoration: InputDecoration(
                   enabledBorder: const UnderlineInputBorder(

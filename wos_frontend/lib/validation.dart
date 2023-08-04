@@ -237,7 +237,7 @@ class Validation {
     return {"res": true};
   }
 
-  Map<String, dynamic> chiSquared(Map<String, String> vals) {
+  static Map<String, dynamic> chiSquared(Map<String, String> vals) {
     if (int.tryParse(vals["df"]!) == null) {
       return {
         "res": false,
@@ -340,6 +340,103 @@ class Validation {
             "res": false,
             "msg": "Probability must be positive",
             "fields": ["P"]
+          };
+        }
+      }
+    }
+    return {"res": true};
+  }
+
+  static Map<String, dynamic> bivariate(Map<String, String> vals) {
+    String delimiter = vals["delimiter"]!;
+    if (vals.keys.contains("xInput")) {
+      String xVals = vals["xInput"]!;
+      String yVals = vals["yInput"]!;
+      if (xVals == "") {
+        return {
+          "res": false,
+          "msg": "At least one x value must be entered",
+          "fields": ["xInput"]
+        };
+      } else if (yVals == "") {
+        return {
+          "res": false,
+          "msg": "At least one y value must be entered",
+          "fields": ["yInput"]
+        };
+      }
+      List<String> splitX = xVals.split(delimiter);
+      List<String> splitY = yVals.split(delimiter);
+      if (splitX.length != splitY.length) {
+        return {
+          "res": false,
+          "msg": "There must be the same number of x and y values",
+          "fields": ["xInput", "yInput"]
+        };
+      } else if (splitX.length > 50) {
+        return {
+          "res": false,
+          "msg": "Maximum of 50 values can be inputted",
+          "fields": ["xInput", "yInput"]
+        };
+      }
+      for (int i = 0; i < splitX.length; i++) {
+        if (double.tryParse(splitX[i]) == null) {
+          return {
+            "res": false,
+            "msg": "${xVals[i]} is not a valid decimal",
+            "fields": ["xInput"]
+          };
+        } else if (double.tryParse(splitY[i]) == null) {
+          return {
+            "res": false,
+            "msg": "${yVals[i]} is not a valid decimal",
+            "fields": ["yInput"]
+          };
+        }
+        double x = double.parse(splitX[i]);
+        double y = double.parse(splitY[i]);
+        if (x < -10000 || x > 10000) {
+          return {
+            "res": false,
+            "msg": "$x is out of range",
+            "fields": ["xInput"]
+          };
+        } else if (y < -10000 || y > 10000) {
+          return {
+            "res": false,
+            "msg": "$y is out of range",
+            "fields": ["yInput"]
+          };
+        }
+      }
+    } else {
+      if (vals["dataInput"] == "") {
+        return {
+          "res": false,
+          "msg": "At least one point must be inputted",
+          "fields": ["dataInput"]
+        };
+      }
+      List<String> points = vals["dataInput"]!.split(delimiter);
+      print(points);
+      for (String point in points) {
+        print(point);
+        String strippedPoint = point.substring(1, point.length - 1);
+        print(strippedPoint);
+        List<String> xy = strippedPoint.split(", ");
+        print(xy);
+        if (double.tryParse(xy[0]) == null) {
+          return {
+            "res": false,
+            "msg": "${xy[0]} in $point is not a valid decimal",
+            "fields": ["dataInput"]
+          };
+        } else if (double.tryParse(xy[1]) == null) {
+          return {
+            "res": false,
+            "msg": "${xy[1]} in $point is not a valid decimal",
+            "fields": ["dataInput"]
           };
         }
       }

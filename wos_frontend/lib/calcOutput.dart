@@ -17,7 +17,6 @@ class CalcOutput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("ok");
     return ListView(children: createOutputFields());
   }
 }

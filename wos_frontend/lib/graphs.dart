@@ -136,3 +136,79 @@ class ContinuousGraph extends StatelessWidget {
     return LineChart(generateLineData());
   }
 }
+
+class ScatterGraph extends StatelessWidget {
+  final List<String> xData;
+  final List<String> yData;
+  final String slope;
+  final String intercept;
+
+  const ScatterGraph(
+      {super.key,
+      required this.xData,
+      required this.yData,
+      required this.slope,
+      required this.intercept});
+
+  double max(List<double> vals) {
+    double currentMax = vals[0];
+    for (double val in vals) {
+      if (val > currentMax) {
+        currentMax = val;
+      }
+    }
+    return currentMax;
+  }
+
+  double min(List<double> vals) {
+    double currentMin = vals[0];
+    for (double val in vals) {
+      if (val < currentMin) {
+        currentMin = val;
+      }
+    }
+    return currentMin;
+  }
+
+  LineChartData generateScatterData() {
+    List<double> xVals = xData.map((x) => double.parse(x)).toList();
+    List<double> yVals = yData.map((y) => double.parse(y)).toList();
+    List<FlSpot> points = [];
+    for (int i = 0; i < xVals.length; i++) {
+      points.add(FlSpot(xVals[i], yVals[i]));
+    }
+    double minX = min(xVals);
+    double maxX = max(xVals);
+    double slopeVal = double.parse(slope);
+    double interceptVal = double.parse(intercept);
+    FlSpot regressStart = FlSpot(minX, minX * slopeVal + interceptVal);
+    FlSpot regressEnd = FlSpot(maxX, maxX * slopeVal + interceptVal);
+
+    return LineChartData(
+        lineBarsData: [
+          LineChartBarData(
+              spots: points,
+              show: true,
+              dotData: FlDotData(
+                  getDotPainter: (spot, percent, barData, index) =>
+                      FlDotCrossPainter(size: 13, color: Colors.indigo),
+                  show: true),
+              barWidth: 0),
+          LineChartBarData(
+              spots: [regressStart, regressEnd],
+              show: true,
+              barWidth: 1,
+              dotData: const FlDotData(show: false),
+              color: Colors.black)
+        ],
+        titlesData: const FlTitlesData(
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                AxisTitles(sideTitles: SideTitles(showTitles: false))));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LineChart(generateScatterData());
+  }
+}

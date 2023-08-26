@@ -46,14 +46,15 @@ class OutputFieldState extends State<OutputField> {
   Widget build(BuildContext context) {
     return Column(children: [
       SizedBox(
-          height: 40,
+          height: 50,
           width: MediaQuery.of(context).size.width,
           child: TextButton(
               onPressed: toggleContent,
-              child: Text(
-                  style:
-                      const TextStyle(fontSize: 18, color: Colors.indigoAccent),
-                  "${widget.heading}  ${show ? "-" : "+"}"))),
+              child: LaTexT(
+                  laTeXCode: Text(
+                      style: const TextStyle(
+                          fontSize: 18, color: Colors.indigoAccent),
+                      "${widget.heading}  ${show ? "-" : "+"}")))),
       (() {
         if (show) {
           return Padding(

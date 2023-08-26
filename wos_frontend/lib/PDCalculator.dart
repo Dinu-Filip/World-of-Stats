@@ -92,10 +92,12 @@ class PDCalculatorState extends State<PDCalculator> {
   // Creates all the input fields, dp menu and submit button
   //
   late CalcInput inputSection = CalcInput(
-      key: Key(currentFunc),
-      fieldNames: widget.inputInfo[currentFunc]!,
-      initialVals: widget.initialVals,
-      onSubmit: onSubmit);
+    key: Key(currentFunc),
+    fieldNames: widget.inputInfo[currentFunc]!,
+    initialVals: widget.initialVals,
+    onSubmit: onSubmit,
+    showDp: true,
+  );
   //
   // Stores all of the fields showing the different output of the calculator
   //
@@ -119,7 +121,8 @@ class PDCalculatorState extends State<PDCalculator> {
           key: Key(currentFunc),
           fieldNames: widget.inputInfo[currentFunc]!,
           initialVals: widget.initialVals,
-          onSubmit: onSubmit);
+          onSubmit: onSubmit,
+          showDp: true);
       graph = null;
       outputSection = null;
       resultFields = null;
@@ -194,9 +197,9 @@ class PDCalculatorState extends State<PDCalculator> {
             ])));
       }
     });
-    outputSection = CalcOutput(outputInfo: outputContent);
     resultFields = GridView.count(
         crossAxisCount: 2, childAspectRatio: (4 / 1), children: results);
+    outputSection = CalcOutput(outputInfo: outputContent);
   }
 
   void onSubmit(Map<String, String> submittedVals) async {

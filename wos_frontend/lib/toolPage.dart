@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wos_frontend/PDCalculator.dart';
 import 'package:wos_frontend/dataAnalyser.dart';
+import 'package:wos_frontend/htDistParams.dart';
 
 class ToolPage extends StatefulWidget {
   final String toolGroup;
@@ -22,6 +23,8 @@ class ToolPageState extends State<ToolPage> {
       tool = PDCalculator(distribution: widget.toolName);
     } else if (widget.toolGroup == "Data analysis") {
       tool = const DataAnalyser();
+    } else if (widget.toolGroup == "Hypothesis testing") {
+      tool = const htDistParams();
     }
     return Row(children: [tool]);
   }

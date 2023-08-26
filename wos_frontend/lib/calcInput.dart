@@ -22,6 +22,7 @@ class CalcInput extends StatelessWidget {
   //
   final ValueChanged<Map<String, String>> onSubmit;
   final formKey = GlobalKey<FormState>();
+  final bool showDp;
 
   CalcInput._(
       {super.key,
@@ -29,13 +30,15 @@ class CalcInput extends StatelessWidget {
       this.initialVals,
       required this.inputComps,
       required this.inputVals,
-      required this.onSubmit});
+      required this.onSubmit,
+      required this.showDp});
 
   factory CalcInput(
       {Key? key,
       required Map<String, String> fieldNames,
       Map<String, String>? initialVals,
-      required ValueChanged<Map<String, String>> onSubmit}) {
+      required ValueChanged<Map<String, String>> onSubmit,
+      required bool showDp}) {
     List<SizedBox> inputComps = [];
     //
     // Creates input controllers and components
@@ -68,7 +71,8 @@ class CalcInput extends StatelessWidget {
         initialVals: initialVals,
         inputComps: inputComps,
         inputVals: inputVals,
-        onSubmit: onSubmit);
+        onSubmit: onSubmit,
+        showDp: showDp);
   }
 
   Map<String, String> getInputVals() {
@@ -84,7 +88,6 @@ class CalcInput extends StatelessWidget {
   }
 
   void clearInputFields(List<String> fieldNames) {
-    print("clearing");
     for (String inputName in fieldNames) {
       inputVals[inputName].text = "";
     }
@@ -104,13 +107,21 @@ class CalcInput extends StatelessWidget {
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: inputComps))),
-              const SizedBox(height: 20),
-              SizedBox(
-                  width: 300,
-                  height: 50,
-                  child: dpSelect(
-                      onDecimalSelect: (String newDp) =>
-                          inputVals["dp"] = newDp)),
+              (() {
+                if (showDp) {
+                  return Column(children: [
+                    const SizedBox(height: 20),
+                    SizedBox(
+                        width: 300,
+                        height: 50,
+                        child: dpSelect(
+                            onDecimalSelect: (String newDp) =>
+                                inputVals["dp"] = newDp))
+                  ]);
+                } else {
+                  return const SizedBox(height: 0);
+                }
+              }()),
               const SizedBox(height: 50),
               SizedBox(
                   width: 300,

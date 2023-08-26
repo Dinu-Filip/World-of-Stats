@@ -419,13 +419,9 @@ class Validation {
         };
       }
       List<String> points = vals["dataInput"]!.split(delimiter);
-      print(points);
       for (String point in points) {
-        print(point);
         String strippedPoint = point.substring(1, point.length - 1);
-        print(strippedPoint);
         List<String> xy = strippedPoint.split(", ");
-        print(xy);
         if (double.tryParse(xy[0]) == null) {
           return {
             "res": false,
@@ -442,5 +438,168 @@ class Validation {
       }
     }
     return {"res": true};
+  }
+
+  static Map<String, dynamic> sigLevel(String sigLevel) {
+    double sig = double.parse(sigLevel);
+    if (sig <= 0) {
+      return {
+        "res": false,
+        "msg": "The significance level must be positive",
+        "fields": ["sig_level"]
+      };
+    } else if (sig >= 50) {
+      return {
+        "res": false,
+        "msg": "The significance level must be less than 50%",
+        "fields": ["sig_level"]
+      };
+    } else {
+      return {"res": true};
+    }
+  }
+
+  static Map<String, dynamic> binomialHT(Map<String, String> submittedVals) {
+    if (int.tryParse(submittedVals["num_trials"]!) == null) {
+      return {
+        "res": false,
+        "msg": "Number of trials must be valid integer",
+        "fields": ["n"]
+      };
+    } else if (double.tryParse(submittedVals["prob"]!) == null) {
+      return {
+        "res": false,
+        "msg":
+            "Probability of success of the population must be a valid decimal",
+        "fields": "p"
+      };
+    } else if (int.tryParse(submittedVals["X"]!) == null) {
+      return {
+        "res": false,
+        "msg": "Number of successes in the sample must be a valid integer",
+        "fields": "X"
+      };
+    } else if (double.tryParse(submittedVals["sig_level"]!) == null) {
+      return {
+        "res": false,
+        "msg": "The significance level must be a valid decimal",
+        "fields": "sig_level"
+      };
+    } else {
+      int n = int.parse(submittedVals["num_trials"]!);
+      if (n < 0) {
+        return {
+          "res": false,
+          "msg": "Number of successes must be positive",
+          "fields": "n"
+        };
+      } else if (n > 10000) {
+        return {
+          "res": false,
+          "msg": "Number of successes out of range",
+          "fields": "n"
+        };
+      }
+      double p = double.parse(submittedVals["prob"]!);
+      if (p <= 0) {
+        return {
+          "res": false,
+          "msg": "Probability of success of population must be positive",
+          "fields": ["p"]
+        };
+      } else if (p > 1) {
+        return {
+          "res": false,
+          "msg": "Probability of success cannot be greater than 1",
+          "fields": ["p"]
+        };
+      }
+      int X = int.parse(submittedVals["X"]!);
+      if (X < 0) {
+        return {
+          "res": false,
+          "msg": "The number of successes in the sample must be positive",
+          "fields": ["X"]
+        };
+      } else if (X > n) {
+        return {
+          "res": false,
+          "msg":
+              "The number of successes in the sample cannot be greater than the total number of trials",
+          "fields": ["X"]
+        };
+      }
+      Map<String, dynamic> sigRes =
+          Validation.sigLevel(submittedVals["sig_level"]!);
+      if (!sigRes["res"]) {
+        return sigRes;
+      }
+      return {"res": true};
+    }
+  }
+
+  static Map<String, dynamic> normalHT(Map<String, String> submittedVals) {
+    if (double.tryParse(submittedVals["sample_mean"]!) == null) {
+      return {
+        "res": false,
+        "msg": "The sample mean must be a valid decimal",
+        "fields": ["sample_mean"]
+      };
+    } else if (double.tryParse(submittedVals["population_mean"]!) == null) {
+      return {
+        "res": false,
+        "msg": "The mean of the population must be a valid decimal",
+        "fields": ["population_mean"]
+      };
+    } else if (double.tryParse(submittedVals["sd"]!) == null) {
+      return {
+        "res": false,
+        "msg":
+            "The standard deviation of the population must be a valid decimal",
+        "fields": ["population_sd"]
+      };
+    } else if (int.tryParse(submittedVals["N"]!) == null) {
+      return {
+        "res": false,
+        "msg": "The sample size must be a valid integer",
+        "fields": ["sample_size"]
+      };
+    } else if (double.tryParse(submittedVals["sig_level"]!) == null) {
+      return {
+        "res": false,
+        "msg": "The significance level must be a valid decimal",
+        "fields": ["sig_level"]
+      };
+    } else {
+      double sampleMean = double.parse(submittedVals["sample_mean"]!);
+      double populationMean = double.parse(submittedVals["population_mean"]!);
+      double populationSd = double.parse(submittedVals["sd"]!);
+      Map<String, dynamic> sigRes =
+          Validation.sigLevel(submittedVals["sig_level"]!);
+      if (populationMean < -100000 || populationMean > 100000) {
+        return {
+          "res": false,
+          "msg": "Population mean out of range",
+          "fields": ["population_mean"]
+        };
+      } else if (sampleMean < populationMean - 10 * populationSd ||
+          sampleMean > populationMean + 10 * populationSd) {
+        return {
+          "res": false,
+          "msg": "Sample mean out of range",
+          "fields": ["sample_mean"]
+        };
+      } else if (populationSd <= 0) {
+        return {
+          "res": false,
+          "msg": "Population standard deviation out of range",
+          "fields": ["population_sd"]
+        };
+      } else if (!sigRes["res"]) {
+        return sigRes;
+      } else {
+        return {"res": true};
+      }
+    }
   }
 }

@@ -144,8 +144,7 @@ class DataAnalyserState extends State<DataAnalyser> {
                   child:
                       Text(style: const TextStyle(fontSize: 17), element)))));
     });
-    return Expanded(
-        child: Column(children: [
+    return Column(children: [
       SizedBox(
           height: 40,
           width: MediaQuery.of(context).size.width,
@@ -195,7 +194,7 @@ class DataAnalyserState extends State<DataAnalyser> {
               ]));
         }
       }())
-    ]));
+    ]);
   }
 }
 

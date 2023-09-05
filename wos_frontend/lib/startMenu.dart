@@ -18,7 +18,7 @@ class _StartMenuState extends State<StartMenu> {
     "Data analysis": ["Bivariate"],
     "Hypothesis testing": ["Distributional parameters", "Goodness of fit"]
   };
-  Map<String, Container> toolGroups = {};
+  Map<String, Expanded> toolGroups = {};
 
   void _onToolSelect(Map<String, String> toolData) {
     //
@@ -28,14 +28,11 @@ class _StartMenuState extends State<StartMenu> {
         context,
         MaterialPageRoute(
             builder: (context) => Scaffold(
-                body: Center(
-                    child: Container(
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black)),
+                    body: Center(
                         child: ToolPage(
-                          toolGroup: toolData['toolGroup']!,
-                          toolName: toolData['tool']!,
-                        ))))));
+                  toolGroup: toolData['toolGroup']!,
+                  toolName: toolData['tool']!,
+                )))));
   }
 
   _StartMenuState() {
@@ -43,22 +40,43 @@ class _StartMenuState extends State<StartMenu> {
     // Adds selectable option for every type of tool
     //
     toolGroupNames.forEach((String groupName, List<String> toolNames) {
-      List<ToolSelect> group = [];
+      List<SizedBox> group = [];
       for (final tool in toolNames) {
-        group.add(ToolSelect(
-            toolName: tool, toolGroup: groupName, onSelect: _onToolSelect));
+        group.add(SizedBox(
+            height: 220,
+            child: ToolSelect(
+                toolName: tool,
+                toolGroup: groupName,
+                onSelect: _onToolSelect)));
       }
-      toolGroups[groupName] = Container(
-          margin: const EdgeInsets.all(20), child: Column(children: group));
+      toolGroups[groupName] = Expanded(
+          flex: 5,
+          child: Column(children: [
+            Text(groupName,
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
+            ...group
+          ]));
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Container> groupSelects = [];
+    List<Expanded> groupSelects = [];
     toolGroups.forEach((groupName, toolGroup) => groupSelects.add(toolGroup));
 
-    return Scaffold(body: Row(children: groupSelects));
+    return Scaffold(
+        body: Column(children: [
+      const Padding(
+          padding: EdgeInsets.all(20),
+          child: Text("Select one of the tools below",
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700))),
+      Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Spacer(flex: 1),
+        ...groupSelects,
+        const Spacer(flex: 1)
+      ])
+    ]));
   }
 }
 
@@ -77,15 +95,18 @@ class ToolSelect extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         margin: const EdgeInsets.all(10),
-        child: GestureDetector(
-            onTap: () => {
-                  onSelect({'tool': toolName, 'toolGroup': toolGroup})
-                },
-            child: SizedBox(
-                width: 300,
-                child: Column(children: [
-                  Image.asset("assets/images/$toolName.png"),
-                  Text(toolName)
-                ]))));
+        child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+                onTap: () => {
+                      onSelect({'tool': toolName, 'toolGroup': toolGroup})
+                    },
+                child: SizedBox(
+                    width: 250,
+                    child: Column(children: [
+                      Image.asset("assets/images/$toolName.png",
+                          fit: BoxFit.fitWidth),
+                      Text(toolName, style: const TextStyle(fontSize: 17))
+                    ])))));
   }
 }

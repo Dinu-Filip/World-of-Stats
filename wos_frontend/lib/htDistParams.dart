@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:wos_frontend/calcInput.dart';
 import 'package:wos_frontend/calcOutput.dart';
 import 'package:http/http.dart' as http;
+import 'package:wos_frontend/theoryView.dart';
 import 'package:wos_frontend/validation.dart';
 
 const Map<String, Map<String, String>> htInfo = {
@@ -194,8 +195,30 @@ class htDistParamsState extends State<htDistParams> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: Column(children: [
+    return Column(children: [
+      SizedBox(
+          height: 50,
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            const Text("Hypothesis tests of distributional parameters",
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+            const SizedBox(width: 12),
+            MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                    child: const Icon(Icons.info_outline),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Scaffold(
+                                  body: Center(
+                                      child: TheoryView(
+                                          title:
+                                              "Hypothesis tests of distributional parameters",
+                                          toolName:
+                                              "Distributional parameters")))));
+                    }))
+          ])),
       Expanded(
           child: Row(children: [
         Expanded(
@@ -271,7 +294,7 @@ class htDistParamsState extends State<htDistParams> {
           }
         }())
       ]))
-    ]));
+    ]);
   }
 }
 

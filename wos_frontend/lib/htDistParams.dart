@@ -126,7 +126,7 @@ class htDistParamsState extends State<htDistParams> {
           Text(heading, style: const TextStyle(fontSize: 17)),
           const SizedBox(height: 4),
           LaTexT(
-              laTeXCode: Text(data,
+              laTeXCode: Text(data.toString(),
                   style: const TextStyle(
                       fontSize: 22, fontWeight: FontWeight.bold)))
         ])));
@@ -158,7 +158,6 @@ class htDistParamsState extends State<htDistParams> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(submittedVals));
-    print(jsonEncode(submittedVals));
     return jsonDecode(response.body);
   }
 

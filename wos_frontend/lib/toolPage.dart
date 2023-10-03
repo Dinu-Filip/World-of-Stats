@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wos_frontend/PDCalculator.dart';
 import 'package:wos_frontend/dataAnalyser.dart';
+import 'package:wos_frontend/goodnessOfFit.dart';
 import 'package:wos_frontend/htDistParams.dart';
 import 'package:wos_frontend/navMenu.dart';
 
@@ -39,12 +40,18 @@ class ToolPageState extends State<ToolPage> {
     //
     // Determines which type of tool to build
     //
+    print(currentGroup);
+    print(currentTool);
     if (currentGroup == "Probability distribution calculators") {
       tool = PDCalculator(distribution: currentTool);
     } else if (currentGroup == "Data analysis") {
       tool = const DataAnalyser();
     } else if (currentGroup == "Hypothesis testing") {
-      tool = const htDistParams();
+      if (currentTool == "Distributional parameters") {
+        tool = const htDistParams();
+      } else {
+        tool = const GoodnessOfFit();
+      }
     }
 
     return Row(children: [

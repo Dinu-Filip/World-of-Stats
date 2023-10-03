@@ -602,4 +602,82 @@ class Validation {
       }
     }
   }
+
+  static Map<String, dynamic> goodnessOfFit(Map<String, String> submittedVals) {
+    String delimiter = submittedVals["delimiter"]!;
+    List<String> xVals = submittedVals["xVals"]!.split(delimiter);
+    List<String> expectedVals = submittedVals["observedVals"]!.split(delimiter);
+    for (String num in xVals) {
+      if (double.tryParse(num) == null) {
+        return {
+          "res": false,
+          "msg": "Invalid input in x values field ($num)",
+          "fields": ["xVals"]
+        };
+      }
+    }
+    for (String num in expectedVals) {
+      if (double.tryParse(num) == null) {
+        return {
+          "res": false,
+          "msg": "Invalid input in expected values field ($num)",
+          "fields": ["expectedVals"]
+        };
+      }
+    }
+    if (xVals.length != expectedVals.length) {
+      return {
+        "res": false,
+        "msg":
+            "Number of x values must be the same as number of expected values",
+        "fields": ["expectedVals", "xVals"]
+      };
+    }
+    switch (submittedVals["distribution"]) {
+      case "binomial":
+        return Validation.GOFBinomial(submittedVals);
+      default:
+        return {"res": true};
+    }
+  }
+
+  static Map<String, dynamic> GOFBinomial(submittedVals) {
+    String n = submittedVals["n"];
+    String p = submittedVals["p"];
+    if (int.tryParse(n) == null) {
+      return {
+        "res": false,
+        "msg": "Number of trials must be a valid integer",
+        "fields": ["n"]
+      };
+    } else if (double.tryParse(p) == null) {
+      return {
+        "res": false,
+        "msg": "Probability of success must be a valid decimal",
+        "fields": ["p"]
+      };
+    }
+    int nVal = int.parse(n);
+    double pVal = double.parse(p);
+    if (pVal <= 0 || pVal > 1) {
+      return {
+        "res": false,
+        "msg": "Probability of success must be between 0 and 1",
+        "fields": ["p"]
+      };
+    } else if (nVal <= 0) {
+      return {
+        "res": false,
+        "msg": "Number of trials must be positive",
+        "fields": ["n"]
+      };
+    } else if (nVal > 10000) {
+      return {
+        "res": false,
+        "msg": "Number of trials out of range",
+        "fields": ["n"]
+      };
+    }
+    return {"res": true};
+  }
 }

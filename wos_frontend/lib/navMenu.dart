@@ -23,7 +23,7 @@ class NavMenuState extends State<NavMenu> {
       "Chi-squared"
     ],
     "Data analysis": ["Bivariate data"],
-    "Hypothesis testing": ["Distributional parameters"]
+    "Hypothesis testing": ["Distributional parameters", "Goodness of fit"]
   };
   final List<NavDropDown> dropDowns = [];
 

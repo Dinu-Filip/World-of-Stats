@@ -74,7 +74,6 @@ class DataAnalyserState extends State<DataAnalyser> {
   }
 
   void onSubmit(submittedVals) async {
-    print(submittedVals);
     Map<String, dynamic> validateResult = Validation.bivariate(submittedVals);
     late final Map<String, dynamic> response;
     List<String> xVals = [];
@@ -279,7 +278,6 @@ class DataAnalyserInput extends StatelessWidget {
   Map<String, String> getInputVals() {
     Map<String, String> vals = {};
     inputVals.forEach((fieldName, controller) {
-      print(fieldName);
       if (fieldName == "dp") {
         vals["dp"] = controller.toString();
       } else {

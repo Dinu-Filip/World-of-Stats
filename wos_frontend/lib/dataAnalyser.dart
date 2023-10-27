@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:wos_frontend/calcOutput.dart';
 import 'package:wos_frontend/graphs.dart';
 import 'package:flutter/material.dart';
 import 'package:wos_frontend/calcInput.dart';
 import 'package:wos_frontend/validation.dart';
+import 'package:wos_frontend/dataTable.dart';
 import 'package:http/http.dart' as http;
 
 class DataAnalyser extends StatefulWidget {
@@ -15,28 +17,54 @@ class DataAnalyser extends StatefulWidget {
 }
 
 class DataAnalyserState extends State<DataAnalyser> {
-  final List<String> inputTypes = ["(x, y) pairs", "x, y list inputs"];
+  final List<String> inputTypes = [
+    "(x, y) pairs",
+    "x, y list inputs",
+    "table input"
+  ];
   String currentInputType = "(x, y) pairs";
+  String typeData = "bivariate";
   dynamic graph;
   GridView? resultFields;
   CalcOutput? outputSection;
-  late DataAnalyserInput inputSection =
-      DataAnalyserInput(inputType: currentInputType, onSubmit: onSubmit);
+  late DataAnalyserInput inputSection = DataAnalyserInput(
+      inputType: currentInputType, onSubmit: onSubmit, typeData: typeData);
 
-  void switchType(String newType) {
+  void switchTypeInput(String newType) {
     setState(() {
       currentInputType = newType;
-      inputSection = DataAnalyserInput(inputType: newType, onSubmit: onSubmit);
+      inputSection = DataAnalyserInput(
+          inputType: newType, onSubmit: onSubmit, typeData: typeData);
       graph = null;
       resultFields = null;
       outputSection = null;
     });
   }
 
+  void setTypeData(String newDataType) {
+    if (newDataType != typeData) {
+      setState(() {
+        typeData = newDataType;
+        graph = null;
+        resultFields = null;
+        outputSection = null;
+        inputSection = DataAnalyserInput(
+            inputType: currentInputType,
+            onSubmit: onSubmit,
+            typeData: typeData);
+      });
+    }
+  }
+
   Future<Map<String, dynamic>> calculateResult(
       Map<String, dynamic> submittedVals) async {
     String baseIP = "127.0.0.1:8000";
-    String path = "/bivariate/";
+    String path = "";
+    if (typeData == "bivariate") {
+      path = "/bivariate/";
+    } else {
+      path = "/univariate/";
+    }
     Uri uri = Uri.http(baseIP, path);
     var response = await http.post(uri,
         headers: <String, String>{
@@ -50,11 +78,14 @@ class DataAnalyserState extends State<DataAnalyser> {
       String slope, String intercept, List<String> xVals, List<String> yVals) {
     graph = ScatterGraph(
         xData: xVals, yData: yVals, slope: slope, intercept: intercept);
+    print(graph);
   }
 
   void updateOutputs(Map<String, dynamic> results) {
     Map<String, String> resultsContent = {};
+    print(results);
     List<Column> resultGridItems = [];
+
     for (String heading in results.keys.toList()) {
       if (results[heading]["method"] != null) {
         resultsContent[heading] = results[heading]["method"];
@@ -74,7 +105,8 @@ class DataAnalyserState extends State<DataAnalyser> {
   }
 
   void onSubmit(submittedVals) async {
-    Map<String, dynamic> validateResult = Validation.bivariate(submittedVals);
+    Map<String, dynamic> validateResult =
+        Validation.dataAnalysis(submittedVals);
     late final Map<String, dynamic> response;
     List<String> xVals = [];
     List<String> yVals = [];
@@ -87,17 +119,30 @@ class DataAnalyserState extends State<DataAnalyser> {
           xVals.add(xy[0]);
           yVals.add(xy[1]);
         }
-      } else {
+      } else if (currentInputType == "x, y list inputs" &&
+          typeData == "bivariate") {
         xVals = submittedVals["xInput"]!.split(submittedVals["delimiter"]!);
         yVals = submittedVals["yInput"]!.split(submittedVals["delimiter"]!);
+      } else if (currentInputType == "x, y list inputs" &&
+          typeData == "univariate") {
+        xVals = submittedVals["xInput"]!.split(submittedVals["delimiter"]!);
+      } else {
+        xVals = submittedVals["xVals"]!.split(",");
+        yVals = submittedVals["yVals"]!.split(",");
       }
-      response = await calculateResult(
-          {"xVals": xVals, "yVals": yVals, "dp": submittedVals["dp"]});
+      response = await calculateResult({
+        "xVals": xVals,
+        "yVals": yVals,
+        "dp": submittedVals["dp"],
+        "typeData": typeData
+      });
     }
     setState(() {
       if (validateResult["res"]) {
-        updateGraph(response["regress_slope"]["res"],
-            response["regress_intercept"]["res"], xVals, yVals);
+        if (typeData == "bivariate") {
+          updateGraph(response["regress_slope"]["res"],
+              response["regress_intercept"]["res"], xVals, yVals);
+        }
         updateOutputs(response);
       } else {
         showDialog(
@@ -118,43 +163,63 @@ class DataAnalyserState extends State<DataAnalyser> {
 
   @override
   Widget build(BuildContext context) {
-    List<Expanded> tabs = [];
-    inputTypes.forEach((element) {
-      tabs.add(Expanded(
-          flex: 1,
-          child: SizedBox(
-              height: 40,
-              child: TextButton(
-                  style: (() {
-                    if (currentInputType != element) {
-                      return TextButton.styleFrom(
-                          foregroundColor: Colors.indigoAccent,
-                          shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(Radius.zero)));
-                    } else {
-                      return TextButton.styleFrom(
-                          backgroundColor: Colors.indigoAccent,
-                          foregroundColor: Colors.white,
-                          shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(Radius.zero)));
-                    }
-                  }()),
-                  onPressed: () => switchType(element),
-                  child:
-                      Text(style: const TextStyle(fontSize: 17), element)))));
-    });
-    return Column(children: [
-      SizedBox(
-          height: 40,
-          width: MediaQuery.of(context).size.width,
-          child: Row(children: tabs)),
+    return Expanded(
+        child: Column(children: [
       Row(children: [
         Expanded(
             flex: 1,
-            child: SizedBox(
-                height: 415,
-                child: Container(
-                    margin: const EdgeInsets.all(15), child: inputSection))),
+            child: Column(children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  const Text("Select input type",
+                      style: TextStyle(fontSize: 18)),
+                  const SizedBox(width: 20),
+                  SizedBox(
+                      height: 50,
+                      child: DropdownButton(
+                          value: currentInputType,
+                          items: inputTypes
+                              .map<DropdownMenuItem<String>>((String value) =>
+                                  DropdownMenuItem(
+                                      value: value,
+                                      child: Text(value,
+                                          style:
+                                              const TextStyle(fontSize: 16))))
+                              .toList(),
+                          onChanged: (value) => switchTypeInput(value!)))
+                ]),
+              ]),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                SizedBox(
+                    height: 50,
+                    width: 200,
+                    child: ListTile(
+                        title: const Text("Univariate data",
+                            style: TextStyle(fontSize: 18)),
+                        leading: Radio(
+                            value: "univariate",
+                            groupValue: typeData,
+                            onChanged: (value) {
+                              setTypeData("univariate");
+                            }))),
+                SizedBox(
+                    height: 50,
+                    width: 200,
+                    child: ListTile(
+                        title: const Text("Bivariate data",
+                            style: TextStyle(fontSize: 18)),
+                        leading: Radio(
+                            value: "bivariate",
+                            groupValue: typeData,
+                            onChanged: (value) {
+                              setTypeData("bivariate");
+                            })))
+              ]),
+              SizedBox(
+                  height: MediaQuery.of(context).size.height - 250,
+                  child: Container(
+                      margin: const EdgeInsets.all(15), child: inputSection))
+            ])),
         Expanded(
             flex: 1,
             child: Column(children: [
@@ -178,6 +243,7 @@ class DataAnalyserState extends State<DataAnalyser> {
         if (graph == null && resultFields == null && outputSection == null) {
           return const Flexible(flex: 1, child: Text(""));
         } else {
+          print("good2");
           return Expanded(
               flex: 2,
               child: Row(children: [
@@ -193,7 +259,7 @@ class DataAnalyserState extends State<DataAnalyser> {
               ]));
         }
       }())
-    ]);
+    ]));
   }
 }
 
@@ -203,17 +269,33 @@ class DataAnalyserInput extends StatelessWidget {
   final Map<String, String>? initialVals;
   final Map<String, dynamic> inputComps;
   final Map<String, dynamic> inputVals;
+  final String typeData;
+  final Map<int, dynamic> xTableInput = {};
+  final Map<int, dynamic> yTableInput = {};
 
-  const DataAnalyserInput._(
+  void onChanged(List<dynamic> params) {
+    if (params[0][1] == 0) {
+      xTableInput[params[0][0]] = params[1];
+    } else {
+      yTableInput[params[0][0]] = params[1];
+    }
+  }
+
+  DataAnalyserInput._(
       {super.key,
       required this.inputType,
       required this.onSubmit,
       this.initialVals,
       required this.inputComps,
-      required this.inputVals});
+      required this.inputVals,
+      required this.typeData});
 
   factory DataAnalyserInput(
-      {Key? key, required inputType, required onSubmit, initialVals}) {
+      {Key? key,
+      required inputType,
+      required onSubmit,
+      initialVals,
+      required typeData}) {
     Map<String, dynamic> inputComps = {};
     Map<String, dynamic> inputVals = {};
     if (inputType == "(x, y) pairs") {
@@ -221,16 +303,23 @@ class DataAnalyserInput extends StatelessWidget {
       if (initialVals != null) {
         dataController.text = initialVals["dataInput"];
       }
+      String lblText = "";
+      if (typeData == "bivariate") {
+        lblText = "Enter (x, y points)";
+      } else {
+        lblText = "Enter values";
+      }
       inputComps["dataInput"] = TextField(
           style: const TextStyle(fontSize: 17),
           controller: dataController,
           maxLines: 4,
-          decoration: const InputDecoration(
-              enabledBorder: UnderlineInputBorder(
+          decoration: InputDecoration(
+              enabledBorder: const UnderlineInputBorder(
                   borderSide: BorderSide(width: 2, color: Colors.indigoAccent)),
-              labelText: "Enter (x, y) points"));
+              labelText: lblText));
+
       inputVals["dataInput"] = dataController;
-    } else {
+    } else if (inputType == "x, y list inputs") {
       TextEditingController xController = TextEditingController();
       TextEditingController yController = TextEditingController();
       if (initialVals != null) {
@@ -245,14 +334,20 @@ class DataAnalyserInput extends StatelessWidget {
               enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(width: 2, color: Colors.indigoAccent)),
               labelText: "Enter x values"));
+      String lblText = "";
+      if (typeData == "univariate") {
+        lblText = "Enter frequence values";
+      } else {
+        lblText = "Enter y values";
+      }
       inputComps["yInput"] = TextField(
         style: const TextStyle(fontSize: 17),
         controller: yController,
         maxLines: 3,
-        decoration: const InputDecoration(
-            enabledBorder: UnderlineInputBorder(
+        decoration: InputDecoration(
+            enabledBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(width: 2, color: Colors.indigoAccent)),
-            labelText: "Enter y values"),
+            labelText: lblText),
       );
       inputVals["xInput"] = xController;
       inputVals["yInput"] = yController;
@@ -272,7 +367,8 @@ class DataAnalyserInput extends StatelessWidget {
         inputType: inputType,
         onSubmit: onSubmit,
         inputComps: inputComps,
-        inputVals: inputVals);
+        inputVals: inputVals,
+        typeData: typeData);
   }
 
   Map<String, String> getInputVals() {
@@ -284,29 +380,69 @@ class DataAnalyserInput extends StatelessWidget {
         vals[fieldName] = controller.text;
       }
     });
+    if (inputType == "table input") {
+      List<int> xKeys = [];
+      List<int> yKeys = [];
+      List<dynamic> xVals = [];
+      List<dynamic> yVals = [];
+      for (int key in xTableInput.keys) {
+        xKeys.add(key);
+      }
+      for (int key in yTableInput.keys) {
+        yKeys.add(key);
+      }
+      xKeys.sort();
+      yKeys.sort();
+      for (int key in xKeys) {
+        xVals.add(xTableInput[key]);
+      }
+      for (int key in yKeys) {
+        yVals.add(yTableInput[key]);
+      }
+      vals["xVals"] = xVals.join(",");
+      vals["yVals"] = yVals.join(",");
+    }
+    vals["typeData"] = typeData;
     return vals;
   }
 
   @override
   Widget build(BuildContext context) {
-    List<TextField> dataInputs = [];
+    List<Widget> dataInputs = [];
     if (inputType == "(x, y) pairs") {
       dataInputs.add(inputComps["dataInput"]);
-    } else {
+    } else if (inputType == "x, y list inputs") {
       dataInputs.add(inputComps["xInput"]);
-      dataInputs.add(inputComps["yInput"]);
+      if (typeData == "bivariate") {
+        dataInputs.add(inputComps["yInput"]);
+      }
     }
-    return Column(children: [
-      SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: 70.0 * inputComps.length,
-          child: Column(children: dataInputs)),
+    return ListView(children: [
+      (() {
+        if (inputType == "table input") {
+          return DataFieldTable(
+              key: Key(typeData), onChanged: onChanged, typeData: typeData);
+        } else {
+          return SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: 70.0 * inputComps.length,
+              child: Column(children: dataInputs));
+        }
+      })(),
       const SizedBox(height: 20),
       SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Row(children: [
-            const Spacer(flex: 1),
-            Expanded(flex: 2, child: inputComps["delimiter"]),
+            ...(() {
+              if (inputType != "table input") {
+                return [
+                  const Spacer(flex: 1),
+                  Expanded(flex: 2, child: inputComps["delimiter"])
+                ];
+              } else {
+                return [const SizedBox()];
+              }
+            }()),
             const Spacer(flex: 1),
             Expanded(
                 flex: 2,

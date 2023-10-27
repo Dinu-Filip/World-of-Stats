@@ -347,9 +347,22 @@ class Validation {
     return {"res": true};
   }
 
-  static Map<String, dynamic> bivariate(Map<String, String> vals) {
-    String delimiter = vals["delimiter"]!;
-    if (vals.keys.contains("xInput")) {
+  static Map<String, dynamic> dataAnalysis(Map<String, String> vals) {
+    String delimiter = "";
+    if (vals["typeData"] == "bivariate") {
+      delimiter = vals["delimiter"]!;
+    } else {
+      delimiter = ",";
+    }
+    if (vals["inputType"] == "x, y list inputs" ||
+        vals["inputType"] == "table input") {
+      String yLbl = "";
+      if (vals["typeData"] == "univariate") {
+        yLbl = "frequency";
+      } else {
+        yLbl = "y";
+      }
+
       String xVals = vals["xInput"]!;
       String yVals = vals["yInput"]!;
       if (xVals == "") {
@@ -361,7 +374,7 @@ class Validation {
       } else if (yVals == "") {
         return {
           "res": false,
-          "msg": "At least one y value must be entered",
+          "msg": "At least one $yLbl value must be entered",
           "fields": ["yInput"]
         };
       }
@@ -370,7 +383,7 @@ class Validation {
       if (splitX.length != splitY.length) {
         return {
           "res": false,
-          "msg": "There must be the same number of x and y values",
+          "msg": "There must be the same number of x and $yLbl values",
           "fields": ["xInput", "yInput"]
         };
       } else if (splitX.length > 50) {
@@ -387,10 +400,18 @@ class Validation {
             "msg": "${xVals[i]} is not a valid decimal",
             "fields": ["xInput"]
           };
-        } else if (double.tryParse(splitY[i]) == null) {
+        } else if (vals["typeData"] == "bivariate" &&
+            double.tryParse(splitY[i]) == null) {
           return {
             "res": false,
             "msg": "${yVals[i]} is not a valid decimal",
+            "fields": ["yInput"]
+          };
+        } else if (vals["typeData"] == "univariate" &&
+            int.tryParse(splitY[i]) == null) {
+          return {
+            "res": false,
+            "msg": "${yVals[i]} is not a valid integer",
             "fields": ["yInput"]
           };
         }
@@ -399,18 +420,18 @@ class Validation {
         if (x < -10000 || x > 10000) {
           return {
             "res": false,
-            "msg": "$x is out of range",
+            "msg": "${splitX[i]} is out of range",
             "fields": ["xInput"]
           };
         } else if (y < -10000 || y > 10000) {
           return {
             "res": false,
-            "msg": "$y is out of range",
+            "msg": "${splitY[i]} is out of range",
             "fields": ["yInput"]
           };
         }
       }
-    } else {
+    } else if (vals["inputType"] == "(x, y) pairs") {
       if (vals["dataInput"] == "") {
         return {
           "res": false,
@@ -419,21 +440,33 @@ class Validation {
         };
       }
       List<String> points = vals["dataInput"]!.split(delimiter);
-      for (String point in points) {
-        String strippedPoint = point.substring(1, point.length - 1);
-        List<String> xy = strippedPoint.split(", ");
-        if (double.tryParse(xy[0]) == null) {
-          return {
-            "res": false,
-            "msg": "${xy[0]} in $point is not a valid decimal",
-            "fields": ["dataInput"]
-          };
-        } else if (double.tryParse(xy[1]) == null) {
-          return {
-            "res": false,
-            "msg": "${xy[1]} in $point is not a valid decimal",
-            "fields": ["dataInput"]
-          };
+      if (vals["typeData"] == "bivariate") {
+        for (String point in points) {
+          String strippedPoint = point.substring(1, point.length - 1);
+          List<String> xy = strippedPoint.split(", ");
+          if (double.tryParse(xy[0]) == null) {
+            return {
+              "res": false,
+              "msg": "${xy[0]} in $point is not a valid decimal",
+              "fields": ["dataInput"]
+            };
+          } else if (double.tryParse(xy[1]) == null) {
+            return {
+              "res": false,
+              "msg": "${xy[1]} in $point is not a valid decimal",
+              "fields": ["dataInput"]
+            };
+          }
+        }
+      } else {
+        for (String point in points) {
+          if (double.tryParse(point) == null) {
+            return {
+              "res": false,
+              "msg": "$point is not a valid decimal",
+              "fields": ["dataInput"]
+            };
+          }
         }
       }
     }

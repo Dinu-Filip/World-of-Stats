@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:wos_frontend/calcOutput.dart';
 import 'package:wos_frontend/graphs.dart';
 import 'package:flutter/material.dart';
-import 'package:wos_frontend/calcInput.dart';
+import 'package:wos_frontend/calc_input.dart';
 import 'package:wos_frontend/validation.dart';
 import 'package:wos_frontend/dataTable.dart';
 import 'package:http/http.dart' as http;

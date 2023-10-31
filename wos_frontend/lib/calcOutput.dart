@@ -46,7 +46,7 @@ class OutputFieldState extends State<OutputField> {
   Widget build(BuildContext context) {
     return Column(children: [
       SizedBox(
-          height: 50,
+          height: 40,
           width: MediaQuery.of(context).size.width,
           child: TextButton(
               onPressed: toggleContent,

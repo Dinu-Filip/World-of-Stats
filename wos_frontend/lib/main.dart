@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wos_frontend/startMenu.dart';
+import 'package:wos_frontend/start_menu.dart';
 
 void main() {
   runApp(const MyApp());

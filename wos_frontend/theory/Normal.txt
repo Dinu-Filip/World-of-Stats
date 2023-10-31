@@ -1,0 +1,25 @@
+The normal distribution is modelled as having PDF
+$$f\left(x\right)=\frac{1}{\sigma\sqrt{2\pi}}e^\frac{-\left(x-\mu\right)^2}{2\sigma^2}$$
+where $\mu$ is the mean and $\sigma^2$ is the variance. The CDF is given by:
+$$P\left(X\le x\right)=\frac{1}{\sigma\sqrt{2\pi}}\int_{-\infty}^{x}{e^\frac{-\left(t-\mu\right)^2}{2\sigma^2}dt}$$
+
+The normal distrubtion has the following properties:
+	1. A bell curve with asymptotes at each end
+	2. Symmetrical (mean = median = mode)
+	3. Points of inflection at $\mu\pm\sigma$
+
+For instance, consider an IQ test applied to a population of adults. The random variable $X$, which represents the scores on the text, has a mean of 100 and standard deviation of 15 points. It can be modelled using the normal distribution $(X~N\left(100,{15}^2\right))$. The probability that a randomly selected person gets less than 140 on a test would therefore be equal to $P\left(X\le140\right)=\frac{1}{15\times\sqrt{2\pi}}\int_{\infty}^{x}{e^\frac{-\left(t-100\right)^2}{2\times{15}^2}dt}=0.9962$ (4sf). Note that the integral in the normal distribution CDF is not analytically tractable so it has to be evaluated using numerical methods.
+
+When $\mu=0$ and $\sigma^2=1$ then $X$ has a standard normal distribution. For $X \sim N\left(\mu,\sigma^2\right)$ and we code $X$ using $Y=\frac{X-\mu}{\sigma}$ then $Y~N\left(0,1\right)$. This allows us to write the CDF of any normal distribution in terms of the standard normal distribution.
+$$P\left(X\le x\right)=P\left(Y\le\frac{x-\mu}{\sigma}\right)=\Phi\left(\frac{x-\mu}{\sigma}\right)$$
+Since the standard normal distribution is symmetric about 0:
+
+$\Phi\left(z\right)=1-\Phi\left(-z\right)$
+$f\left(z\right)=f\left(-z\right)$
+
+For instance, if an analogue signal received at a detector is modelled as $X \sim N\left(200,256\right)$ then the probability that the signal exceeds 240 is $P\left(X>240\right)=1-P\left(X\le240\right)=1-\Phi\left(\frac{240-200}{\sqrt{256}}\right)=1-\Phi\left(2.5\right)=0.00621\left(3sf\right)$. In A Level problems, the standard normal distribution can be used to calculate an unknown mean or 
+In general, for random variables $X_1,\ X_2,\ldots,\ X_n$ of any probability distribution:
+$$\sum_{i=1}^{n}X_i~N\left(n\mu,n\sigma^2\right)$$
+For the binomial distribution, for large n:
+$$B\left(n,\ p\right)\approx\ N\left(np,np\left(1-p\right)\right)$$
+Since the bell curve of the normal distribution is symmetric about the mean, it has a skewness of 0.

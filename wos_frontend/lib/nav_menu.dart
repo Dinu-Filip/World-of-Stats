@@ -16,18 +16,24 @@ class NavMenu extends StatefulWidget {
 }
 
 class NavMenuState extends State<NavMenu> {
-  final Map<String, List<String>> options = {
-    "Probability distribution calculators": [
-      "Binomial",
-      "Normal",
-      "Chi-squared"
-    ],
-    "Data analysis": ["Bivariate data"],
+  static const Map<String, List<String>> options = {
+    "Probability distributions": ["Binomial", "Normal", "Chi-squared"],
+    "Data analysis": ["Discrete"],
     "Hypothesis testing": ["Distributional parameters", "Goodness of fit"]
   };
   final List<NavDropDown> dropDowns = [];
+  bool showMenu = true;
+
+  void toggleMenu() {
+    setState(() {
+      showMenu = !showMenu;
+    });
+  }
 
   void createDropDowns() {
+    //
+    // Creates dropdown for each group of tools in the menu
+    //
     options.forEach((header, options) {
       dropDowns.add(NavDropDown(
           selectTool: widget.selectTool,
@@ -55,11 +61,65 @@ class NavMenuState extends State<NavMenu> {
   Widget build(BuildContext context) {
     dropDowns.clear();
     createDropDowns();
-    return Column(children: [
-      const Text("Menu",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-      ...dropDowns
-    ]);
+    int flexVal = 2;
+    double currentWidth = MediaQuery.of(context).size.width;
+    if (900 <= currentWidth && currentWidth < 1250) {
+      flexVal = 3;
+    } else if (currentWidth < 900) {
+      flexVal = 4;
+    }
+
+    if (showMenu) {
+      return Flexible(
+          flex: flexVal,
+          child: Padding(
+              padding: const EdgeInsets.only(right: 5),
+              child: Container(
+                  constraints: const BoxConstraints(minWidth: 500),
+                  decoration: const BoxDecoration(
+                      color: Color.fromRGBO(250, 250, 250, 1),
+                      boxShadow: [
+                        BoxShadow(
+                            color: Color.fromARGB(255, 238, 238, 238),
+                            blurRadius: 10,
+                            spreadRadius: 0.2)
+                      ]),
+                  child: Column(children: [
+                    Padding(
+                        padding: const EdgeInsets.only(left: 15, top: 5),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("World of Stats",
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold)),
+                              SizedBox(
+                                  width: 40,
+                                  height: 35,
+                                  child: TextButton(
+                                      onPressed: toggleMenu,
+                                      child: const Icon(
+                                          color: Colors.indigoAccent,
+                                          Icons.keyboard_arrow_left)))
+                            ])),
+                    const SizedBox(height: 10),
+                    ...dropDowns
+                  ]))));
+    } else {
+      return Flexible(
+          flex: flexVal,
+          child: Padding(
+              padding: const EdgeInsets.only(top: 10, left: 5),
+              child: SizedBox(
+                  width: 40,
+                  height: 35,
+                  child: TextButton(
+                      onPressed: toggleMenu,
+                      child: const Icon(
+                          color: Colors.indigoAccent,
+                          Icons.keyboard_arrow_right)))));
+    }
   }
 }
 
@@ -87,7 +147,9 @@ class NavDropDownState extends State<NavDropDown> {
   @override
   Widget build(BuildContext context) {
     List<SizedBox> toolSelects = [];
-
+    //
+    // Selectively renders the option that represents the tool currently being used
+    //
     for (String tool in widget.options) {
       if (tool == widget.currentTool) {
         toolSelects.add(SizedBox(
@@ -118,31 +180,35 @@ class NavDropDownState extends State<NavDropDown> {
                 ]))));
       }
     }
+
+    IconData toggleIcon;
+    if (showOptions) {
+      toggleIcon = Icons.arrow_drop_up_rounded;
+    } else {
+      toggleIcon = Icons.arrow_drop_down_rounded;
+    }
     return Column(
       children: [
         SizedBox(
             height: 48,
-            width: double.infinity,
             child: TextButton(
                 onPressed: () {
                   setState(() {
                     showOptions = !showOptions;
                   });
                 },
-                child: Row(children: [
-                  const SizedBox(width: 30),
-                  Expanded(
-                      flex: 4,
-                      child: Text(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(width: 20),
+                      Text(
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                               fontSize: 18, color: Colors.indigoAccent),
-                          widget.heading)),
-                  const Expanded(
-                      flex: 1,
-                      child: Icon(Icons.arrow_drop_down_rounded,
-                          color: Colors.indigoAccent, size: 30)),
-                  const SizedBox(width: 10)
-                ]))),
+                          widget.heading),
+                      const Spacer(),
+                      Icon(toggleIcon, color: Colors.indigoAccent, size: 30),
+                    ]))),
         (() {
           if (showOptions) {
             return Column(children: toolSelects);

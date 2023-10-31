@@ -97,44 +97,41 @@ class CalcInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
-        child: SizedBox(
-            height: MediaQuery.of(context).size.height - 84,
-            child: Column(children: [
-              Expanded(
-                  flex: 3,
-                  child: Form(
-                      key: formKey,
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: inputComps))),
-              (() {
-                if (showDp) {
-                  return Column(children: [
-                    const SizedBox(height: 20),
-                    SizedBox(
-                        width: 300,
-                        height: 50,
-                        child: dpSelect(
-                            onDecimalSelect: (String newDp) =>
-                                inputVals["dp"] = newDp))
-                  ]);
-                } else {
-                  return const SizedBox(height: 0);
-                }
-              }()),
-              const SizedBox(height: 50),
-              SizedBox(
-                  width: 300,
-                  height: 40,
-                  child: TextButton(
-                      style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.indigoAccent),
-                      onPressed: () => onSubmit(getInputVals()),
-                      child: const Text(
-                          style: TextStyle(fontSize: 18), "Submit"))),
-              const Spacer(flex: 3)
-            ])));
+        constraints:
+            BoxConstraints(maxHeight: MediaQuery.of(context).size.height - 130),
+        child: Column(children: [
+          Form(
+              key: formKey,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: inputComps)),
+          (() {
+            if (showDp) {
+              return Column(children: [
+                const SizedBox(height: 20),
+                SizedBox(
+                    width: 300,
+                    height: 50,
+                    child: dpSelect(
+                        onDecimalSelect: (String newDp) =>
+                            inputVals["dp"] = newDp))
+              ]);
+            } else {
+              return const SizedBox(height: 0);
+            }
+          }()),
+          const SizedBox(height: 50),
+          SizedBox(
+              width: 300,
+              height: 40,
+              child: TextButton(
+                  style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.indigoAccent),
+                  onPressed: () => onSubmit(getInputVals()),
+                  child: const Text(style: TextStyle(fontSize: 18), "Submit"))),
+          const Spacer(flex: 3)
+        ]));
   }
 }
 

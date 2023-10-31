@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 
 const Map<String, String> theoryFiles = {
-  "Distributional parameters": "hypothesis_tests"
+  "Distributional parameters": "hypothesis_tests",
+  "Binomial": "Binomial",
+  "Normal": "Normal",
+  "Chi-squared": "Chi-squared"
 };
 
 class TheoryView extends StatelessWidget {
@@ -16,8 +19,7 @@ class TheoryView extends StatelessWidget {
   Widget build(BuildContext context) {
     String theory =
         File("theory/${theoryFiles[toolName]}.txt").readAsStringSync();
-    return Expanded(
-        child: Column(children: [
+    return Column(children: [
       const SizedBox(height: 10),
       SizedBox(
           width: MediaQuery.of(context).size.width / 5,
@@ -38,14 +40,14 @@ class TheoryView extends StatelessWidget {
               style:
                   const TextStyle(fontSize: 30, fontWeight: FontWeight.w500))),
       Expanded(
-          flex: 1,
-          child: Container(
-              margin: const EdgeInsets.only(left: 50, right: 50, bottom: 50),
-              child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
+          child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Container(
+                  margin: const EdgeInsets.only(
+                      top: 5, left: 25, right: 25, bottom: 20),
                   child: LaTexT(
                       laTeXCode:
                           Text(theory, style: const TextStyle(fontSize: 23))))))
-    ]));
+    ]);
   }
 }

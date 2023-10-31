@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:wos_frontend/PDCalculator.dart';
+import 'package:wos_frontend/pd_calculator.dart';
 import 'package:wos_frontend/dataAnalyser.dart';
 import 'package:wos_frontend/goodnessOfFit.dart';
 import 'package:wos_frontend/htDistParams.dart';
-import 'package:wos_frontend/navMenu.dart';
+import 'package:wos_frontend/nav_menu.dart';
 
 class ToolPage extends StatefulWidget {
   final String toolGroup;
@@ -19,10 +19,13 @@ class ToolPageState extends State<ToolPage> {
   int numSelects = 0;
   late String currentGroup = widget.toolGroup;
   late String currentTool = widget.toolName;
+  bool showMenu = true;
+
   late NavMenu menu = NavMenu(
       selectTool: selectTool,
       currentGroup: currentGroup,
       currentTool: currentTool);
+
   void selectTool(String toolName, String toolGroup) {
     setState(() {
       numSelects += 1;
@@ -40,10 +43,8 @@ class ToolPageState extends State<ToolPage> {
     //
     // Determines which type of tool to build
     //
-    print(currentGroup);
-    print(currentTool);
-    if (currentGroup == "Probability distribution calculators") {
-      tool = PDCalculator(distribution: currentTool);
+    if (currentGroup == "Probability distributions") {
+      tool = PDCalculator(distribution: currentTool, key: Key(currentTool));
     } else if (currentGroup == "Data analysis") {
       tool = const DataAnalyser();
     } else if (currentGroup == "Hypothesis testing") {
@@ -53,14 +54,13 @@ class ToolPageState extends State<ToolPage> {
         tool = const GoodnessOfFit();
       }
     }
-
-    return Row(children: [
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      menu,
       Expanded(
-          flex: 1,
-          child: Padding(padding: const EdgeInsets.all(10), child: menu)),
-      Expanded(
-          flex: 3,
-          child: Padding(padding: const EdgeInsets.all(10), child: tool))
+          flex: 7,
+          child: Padding(
+              padding: const EdgeInsets.only(top: 10, left: 5, right: 10),
+              child: tool))
     ]);
   }
 }

@@ -28,6 +28,7 @@ class DiscreteGraph extends StatelessWidget {
     for (String x in barData.keys.toList()) {
       int xVal = int.parse(x);
       double p = double.parse(barData[x]!);
+
       if (lowerX == null) {
         if (xVal <= upperX!) {
           bars.add(BarChartGroupData(
@@ -57,14 +58,13 @@ class DiscreteGraph extends StatelessWidget {
         }
       }
     }
-
     return BarChartData(
-      barGroups: bars,
-      // titlesData: const FlTitlesData(
-      //     topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-      //     rightTitles:
-      //         AxisTitles(sideTitles: SideTitles(showTitles: false)))
-    );
+        barGroups: bars,
+        titlesData: const FlTitlesData(
+            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                AxisTitles(sideTitles: SideTitles(showTitles: false))));
   }
 
   @override
@@ -96,11 +96,15 @@ class ContinuousGraph extends StatelessWidget {
       upperX = null;
     } else {
       lowerX = double.parse(lower);
-      upperX = double.parse(lower);
+      upperX = double.parse(upper);
     }
+    double largestP = 0;
     for (String x in lineData.keys.toList()) {
       double xVal = double.parse(x);
       double p = double.parse(lineData[x]!);
+      if (p > largestP) {
+        largestP = p;
+      }
       if (lowerX == null) {
         if (xVal <= upperX!) {
           areaPoints.add(FlSpot(xVal, p));
@@ -119,14 +123,16 @@ class ContinuousGraph extends StatelessWidget {
     return LineChartData(
         lineBarsData: [
           LineChartBarData(
+              spots: curvePoints, dotData: const FlDotData(show: false)),
+          LineChartBarData(
               spots: areaPoints,
               dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(show: true)),
-          LineChartBarData(
-              spots: curvePoints, dotData: const FlDotData(show: false))
+              belowBarData: BarAreaData(
+                  show: true, color: const Color.fromARGB(177, 255, 117, 117)))
         ],
         titlesData: const FlTitlesData(
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
             rightTitles:
                 AxisTitles(sideTitles: SideTitles(showTitles: false))));
   }

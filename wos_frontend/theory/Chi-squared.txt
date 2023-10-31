@@ -1,0 +1,6 @@
+The chi-squared distribution ($\chi^2$-distribution) with k degrees of freedom is the distribution of the sum of k independent standard normal variables. It is commonly used in goodness of fit tests to determine whether the distribution of some observed values in a sample can be modelled by a particular distribution. The PDF and CDF of the chi-squared distribution are not given here as they require the use of the gamma function which is beyond the scope of A Level mathematics.
+
+Degrees of freedom are calculated from the size of the sample being used; they refer to the amount of information from the sample data that has not been used up. Every time a statistic is calculated from a sample, one degree of freedom is used up; this is an example of a constraint. Another constraint is that the total of the observed frequencies has to match the total frequency of the model. 
+
+In addition, the chi-squared distribution assumes that each observed frequency is greater than some minimum value; at A Level, it is required that any cells with observed frequencies less than 5 are combined. Hence, we have the following formula for the number of degrees of freedom for a sample:
+$$number\ of\ degrees\ of\ freedom=number\ of\ cells\ \left(after\ combining\right)-number\ of\ constraints$$

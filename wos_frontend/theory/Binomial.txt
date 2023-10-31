@@ -1,0 +1,10 @@
+The binomial distribution is used to model the probability of a certain number of successful independently-occuring events out of $n$ trials, each with a fixed probability of success or failure. The binomial distribution can also be described as $n$ identically, independently-occuring Bernoulli trials.
+If $X~B\left(n,p\right)$, then the probability density function is given by
+$$P\left(X=x\right)=\binom{n}{x}p^x\left(1-p\right)^{n-x}$$
+The binomial coefficient $\binom{n}{r}$ refers to the number of ways of choosing $r$ distinct elements from a set of $n$ items. It is defined as
+$$\binom{n}{r}=\frac{n!}{r!\left(n-r\right)!}$$
+Therefore, the binomial coefficient $\binom{n}{x}$ in the formula describes the numbers of ways that $x$ successful trials can occur out of $n$ total trials.
+For instance, let $X$ be the number of heads obtained when tossing the coin $n$ times. The probability of landing on heads is $p=\frac{1}{2}$.  We say therefore that $X~B\left(n,\frac{1}{2}\right)$. The PMF is therefore
+$$P\left(X=x\right)=\binom{n}{x}{\frac{1}{2}}^x{\frac{1}{2}}^{n-x}=\binom{n}{x}{\frac{1}{2}}^n$$
+So for 10 trials, $P\left(X=6\right)=\binom{10}{6}{\frac{1}{2}}^{10}=0.206\left(3sf\right)$
+The mean of the binomial distribution is given as $np$ and the variance as $np\left(1-p\right)$. The skewness is given by $\frac{1-2p}{\sqrt{np\left(1-p\right)}}$

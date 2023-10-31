@@ -190,7 +190,7 @@ class Validation {
           "fields": ["x_2"]
         };
       }
-      if (vals["x_1"] != null) {
+      if (vals["x_1"] != "") {
         double x_1 = double.parse(vals["x_1"]!);
         if (x_1 < -20000 || x_1 > 20000) {
           return {
@@ -200,7 +200,7 @@ class Validation {
           };
         }
       }
-      if (vals["x_2"] != null) {
+      if (vals["x_2"] != "") {
         double x_2 = double.parse(vals["x_2"]!);
         if (x_2 < -20000 || x_2 > 20000) {
           return {

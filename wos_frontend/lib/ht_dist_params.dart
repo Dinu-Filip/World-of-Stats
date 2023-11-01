@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:latext/latext.dart';
 import 'package:flutter/material.dart';
+import 'package:wos_frontend/option_select.dart';
 import 'package:wos_frontend/calc_input.dart';
 import 'package:wos_frontend/calcOutput.dart';
 import 'package:http/http.dart' as http;
-import 'package:wos_frontend/theoryView.dart';
+import 'package:wos_frontend/info_section.dart';
 import 'package:wos_frontend/validation.dart';
 
 const Map<String, Map<String, String>> htInfo = {
@@ -39,18 +40,35 @@ const Map<String, Map<String, String>> testVals = {
   }
 };
 
-class htDistParams extends StatefulWidget {
-  const htDistParams({super.key});
+class HTDistParams extends StatefulWidget {
+  const HTDistParams({super.key});
 
   @override
-  State<htDistParams> createState() => htDistParamsState();
+  State<HTDistParams> createState() => HTDistParamsState();
 }
 
-class htDistParamsState extends State<htDistParams> {
+class HTDistParamsState extends State<HTDistParams> {
+  //
+  // Stores the supported distributions
+  //
   final List<String> distributions = ["binomial", "normal"];
+  //
+  // Stores the two ways that the test can be carried out
+  //
   final List<String> typeMethods = ["critical region", "p value"];
   final List<String> typeTests = ["one-tailed", "two-tailed"];
   final List<String> tails = ["lower", "upper"];
+  final List<String> sigLevels = [
+    "0.01",
+    "0.025",
+    "0.05",
+    "0.1",
+    "0.2",
+    "0.25"
+  ];
+  //
+  // Parameters of tests are initialised
+  //
   late String currentTail = tails[0];
   late String currentDistribution = distributions[0];
   late String currentMethod = typeMethods[0];
@@ -60,19 +78,12 @@ class htDistParamsState extends State<htDistParams> {
       fieldNames: htInfo[currentDistribution]!,
       onSubmit: onSubmit,
       showDp: false);
+
   CalcOutput? outputSection;
   Map<String, dynamic>? currentRes;
   Column? resultsView;
-  String sigLevel = "";
+  String sigLevel = "0.01";
   int numSubmits = 0;
-  final List<String> sigLevels = [
-    "0.01",
-    "0.025",
-    "0.05",
-    "0.1",
-    "0.2",
-    "0.25"
-  ];
 
   void setCurrentDistribution(String distribution) {
     setState(() {
@@ -111,6 +122,9 @@ class htDistParamsState extends State<htDistParams> {
   }
 
   void updateMethod() {
+    //
+    // Changes the method to p value or critical region
+    //
     Map<String, String> resultsContent = {};
     currentRes![currentMethod]
         .forEach((heading, method) => resultsContent[heading] = method);
@@ -118,6 +132,9 @@ class htDistParamsState extends State<htDistParams> {
   }
 
   void updateOutput() {
+    //
+    // Updates results variable with results of test
+    //
     List<Expanded> results = [];
     currentRes!["res"].forEach((heading, data) {
       if (!typeMethods.contains(heading)) {
@@ -139,6 +156,9 @@ class htDistParamsState extends State<htDistParams> {
 
   Future<Map<String, dynamic>> calculateResult(
       Map<String, String> submittedVals) async {
+    //
+    // Adds parameters of test to data to be sent to backend
+    //
     submittedVals["test_stat"] =
         submittedVals[testVals[currentDistribution]!["test_stat"]]!;
     submittedVals["distribution"] = currentDistribution;
@@ -147,6 +167,9 @@ class htDistParamsState extends State<htDistParams> {
     submittedVals["population_param_value"] =
         submittedVals[testVals[currentDistribution]!["population_param"]]!;
     submittedVals["type_test"] = currentTypeTest;
+    //
+    // Upper and lower tail tests refer only to one-tailed tests
+    //
     if (currentTypeTest == "one-tailed") {
       submittedVals["type_tail"] = currentTail;
     }
@@ -195,28 +218,15 @@ class htDistParamsState extends State<htDistParams> {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      SizedBox(
+      const SizedBox(
           height: 50,
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            const Text("Hypothesis tests of distributional parameters",
+            Text("Hypothesis tests of distributional parameters",
                 style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
-            const SizedBox(width: 12),
-            MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                    child: const Icon(Icons.info_outline),
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Scaffold(
-                                  body: Center(
-                                      child: TheoryView(
-                                          title:
-                                              "Hypothesis tests of distributional parameters",
-                                          toolName:
-                                              "Distributional parameters")))));
-                    }))
+            SizedBox(width: 12),
+            InfoSection(
+                title: "Hypothesis tests of distribution parameters",
+                toolName: "Distributional parameters")
           ])),
       Expanded(
           child: Row(children: [
@@ -224,7 +234,6 @@ class htDistParamsState extends State<htDistParams> {
             flex: 2,
             child: Column(children: [
               SizedBox(
-                  width: MediaQuery.of(context).size.width,
                   height: 100,
                   child: Row(children: [
                     Expanded(
@@ -287,52 +296,12 @@ class htDistParamsState extends State<htDistParams> {
                       height: 120,
                       width: MediaQuery.of(context).size.width,
                       child: resultsView!),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                   Expanded(child: outputSection!)
                 ])));
           }
         }())
       ]))
-    ]);
-  }
-}
-
-class OptionSelect extends StatefulWidget {
-  final ValueChanged<String> changeOption;
-  final List<String> options;
-  final String label;
-
-  const OptionSelect(
-      {super.key,
-      required this.changeOption,
-      required this.options,
-      required this.label});
-
-  @override
-  State<OptionSelect> createState() => OptionSelectState();
-}
-
-class OptionSelectState extends State<OptionSelect> {
-  late String currentOption = widget.options[0];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      Text(widget.label, style: const TextStyle(fontSize: 20)),
-      DropdownButton(
-          underline: Container(height: 2, color: Colors.indigoAccent),
-          value: currentOption,
-          items: widget.options.map((String value) {
-            return DropdownMenuItem(
-                value: value,
-                child: Text(value, style: const TextStyle(fontSize: 18)));
-          }).toList(),
-          onChanged: (String? value) {
-            setState(() {
-              currentOption = value!;
-              widget.changeOption(value);
-            });
-          })
     ]);
   }
 }

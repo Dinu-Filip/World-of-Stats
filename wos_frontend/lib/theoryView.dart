@@ -6,7 +6,8 @@ const Map<String, String> theoryFiles = {
   "Distributional parameters": "hypothesis_tests",
   "Binomial": "Binomial",
   "Normal": "Normal",
-  "Chi-squared": "Chi-squared"
+  "Chi-squared": "Chi-squared",
+  "Goodness of fit": "goodness_of_fit"
 };
 
 class TheoryView extends StatelessWidget {

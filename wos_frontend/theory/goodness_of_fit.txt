@@ -1,0 +1,11 @@
+Goodness of fit is a measure of how well an observed frequency distribution fits to a known distribution. For each observed frequency $O_i$ and expected frequency $E_i$, the chi-square statistic is defined as
+$$X^2=\sum\frac{\left(O_i-E_i\right)^2}{E_i}=\sum\frac{O_i^2}{E_i}-N$$
+where $N$ is the total number of observations.
+
+The less good the fit, the larger the difference between each observed and expected value, so the greater the value of $X^2$.
+
+The null hypothesis of a chi-squared test states there is no difference between the observed and theoretical distribution, whereas the alternative hypothesis says there is a difference.
+
+The chi-squared distribution is most commonly used to approximate the test statistic $X^2$. Goodness-of-fit tests are always one sided, with the critical region being the set of values that are greater than the critical value of $\chi_v^2\left(\alpha\right)$, where $v$ is the degrees of freedom and $\alpha$ is the significance level. Note that if any parameters of the theoretical distribution are estimated by calculation, then an additional degree of freedom is used up.
+
+The Poisson and geometric distribution have a theoretically infinite number of values for the random variable, so all values greater than or equal to some cut-off $n$ are grouped together such that the observed frequency is non-zero. 

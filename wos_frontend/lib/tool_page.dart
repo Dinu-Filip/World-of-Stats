@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wos_frontend/pd_calculator.dart';
 import 'package:wos_frontend/dataAnalyser.dart';
 import 'package:wos_frontend/goodnessOfFit.dart';
-import 'package:wos_frontend/htDistParams.dart';
+import 'package:wos_frontend/ht_dist_params.dart';
 import 'package:wos_frontend/nav_menu.dart';
 
 class ToolPage extends StatefulWidget {
@@ -49,7 +49,7 @@ class ToolPageState extends State<ToolPage> {
       tool = const DataAnalyser();
     } else if (currentGroup == "Hypothesis testing") {
       if (currentTool == "Distributional parameters") {
-        tool = const htDistParams();
+        tool = const HTDistParams();
       } else {
         tool = const GoodnessOfFit();
       }

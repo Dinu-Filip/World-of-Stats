@@ -109,7 +109,7 @@ class DataFieldTableState extends State<DataFieldTable> {
                     side: const BorderSide(color: Colors.indigoAccent)),
                 child: const Text(
                   "Add row",
-                  style: TextStyle(color: Colors.indigoAccent),
+                  style: TextStyle(color: Colors.indigoAccent, fontSize: 16),
                 ),
               )),
           const Spacer(flex: 1),
@@ -120,7 +120,7 @@ class DataFieldTableState extends State<DataFieldTable> {
                 style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.indigoAccent)),
                 child: const Text("Remove row",
-                    style: TextStyle(color: Colors.indigoAccent)),
+                    style: TextStyle(color: Colors.indigoAccent, fontSize: 16)),
               )),
           const Spacer(flex: 1)
         ]),
@@ -134,23 +134,16 @@ class DataFieldTableState extends State<DataFieldTable> {
                             color: Color.fromARGB(255, 129, 129, 129),
                             width: 1))),
                 children: [
-                  const Expanded(
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                        Padding(
-                            padding: EdgeInsets.only(bottom: 15),
-                            child: Text("x", style: TextStyle(fontSize: 16)))
-                      ])),
-                  Expanded(
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                        Padding(
-                            padding: const EdgeInsets.only(bottom: 15),
-                            child: Text(dataLbl,
-                                style: const TextStyle(fontSize: 16)))
-                      ]))
+                  const Padding(
+                      padding: EdgeInsets.only(bottom: 15),
+                      child: Text("x",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18))),
+                  Padding(
+                      padding: const EdgeInsets.only(bottom: 15),
+                      child: Text(dataLbl,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 18)))
                 ]),
             ...rows,
           ],

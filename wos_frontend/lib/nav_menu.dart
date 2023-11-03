@@ -61,6 +61,9 @@ class NavMenuState extends State<NavMenu> {
   Widget build(BuildContext context) {
     dropDowns.clear();
     createDropDowns();
+    //
+    // Dynamic resizing of menu depending on width of application
+    //
     int flexVal = 2;
     double currentWidth = MediaQuery.of(context).size.width;
     if (900 <= currentWidth && currentWidth < 1250) {

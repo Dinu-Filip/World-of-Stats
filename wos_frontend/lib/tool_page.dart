@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wos_frontend/pd_calculator.dart';
-import 'package:wos_frontend/dataAnalyser.dart';
-import 'package:wos_frontend/goodnessOfFit.dart';
+import 'package:wos_frontend/data_analyser.dart';
+import 'package:wos_frontend/goodness_of_fit.dart';
 import 'package:wos_frontend/ht_dist_params.dart';
 import 'package:wos_frontend/nav_menu.dart';
 

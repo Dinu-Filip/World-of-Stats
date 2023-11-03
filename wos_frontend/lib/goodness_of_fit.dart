@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wos_frontend/calcOutput.dart';
+import 'package:wos_frontend/calc_output.dart';
 import 'package:wos_frontend/info_section.dart';
 import 'package:wos_frontend/option_select.dart';
 import 'package:wos_frontend/validation.dart';

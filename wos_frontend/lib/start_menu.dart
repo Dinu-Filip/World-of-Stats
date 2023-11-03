@@ -93,8 +93,8 @@ class ToolSelect extends StatefulWidget {
 }
 
 class ToolSelectState extends State<ToolSelect> {
-  double width = 250;
-  double height = 170;
+  double width = 220;
+  double height = 152;
   Color background = const Color.fromARGB(255, 249, 249, 251);
 
   @override

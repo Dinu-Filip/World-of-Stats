@@ -7,6 +7,9 @@ class CalcOutput extends StatelessWidget {
   const CalcOutput({super.key, required this.outputInfo});
 
   List<OutputField> createOutputFields() {
+    //
+    // Creates separate dropdown for each parameter that has a method
+    //
     List<OutputField> outputComps = [];
     outputInfo.forEach((String heading, String content) {
       outputComps.add(
@@ -17,6 +20,9 @@ class CalcOutput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //
+    // ListView allows CalcOutput to be independently scrollable
+    //
     return ListView(children: createOutputFields());
   }
 }
@@ -37,6 +43,9 @@ class OutputFieldState extends State<OutputField> {
       laTeXCode: Text(style: const TextStyle(fontSize: 18), widget.content));
 
   void toggleContent() {
+    //
+    // Allows each method widget to be collapsed and expanded separately
+    //
     setState(() {
       show = !show;
     });

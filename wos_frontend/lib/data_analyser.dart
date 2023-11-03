@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:wos_frontend/calcOutput.dart';
+import 'package:wos_frontend/calc_output.dart';
 import 'package:wos_frontend/graphs.dart';
 import 'package:flutter/material.dart';
 import 'package:wos_frontend/calc_input.dart';
 import 'package:wos_frontend/validation.dart';
-import 'package:wos_frontend/dataTable.dart';
+import 'package:wos_frontend/data_table.dart';
 import 'package:http/http.dart' as http;
 
 class DataAnalyser extends StatefulWidget {
@@ -116,47 +116,59 @@ class DataAnalyserState extends State<DataAnalyser> {
   }
 
   void onSubmit(submittedVals) async {
-    Map<String, dynamic> validateResult =
-        Validation.dataAnalysis(submittedVals);
-    print(submittedVals);
     late final Map<String, dynamic> response;
     List<String> xVals = [];
     List<String> yVals = [];
-    if (validateResult["res"]) {
+    //
+    // Formats data as needed by data analysis function in backend
+    //
+    if (currentInputType == "(x, y) pairs") {
       //
-      // Formats data as needed by data analysis function in backend
+      // First separates pairs using the delimiter and then separates the
+      // number in each pair
       //
-      if (currentInputType == "(x, y) pairs") {
-        List<String> points =
-            submittedVals["dataInput"]!.split(submittedVals["delimiter"]!);
-        if (typeData == "bivariate") {
-          for (String point in points) {
-            print(point);
-            List<String> xy = point.substring(1, point.length - 1).split(", ");
-            xVals.add(xy[0]);
-            yVals.add(xy[1]);
-          }
-        } else {
-          xVals = points;
-        }
-      } else if (currentInputType == "x, y list inputs" &&
-          typeData == "bivariate") {
-        xVals = submittedVals["xInput"]!.split(submittedVals["delimiter"]!);
-        yVals = submittedVals["yInput"]!.split(submittedVals["delimiter"]!);
-      } else if (currentInputType == "x, y list inputs" &&
-          typeData == "univariate") {
-        xVals = submittedVals["xInput"]!.split(submittedVals["delimiter"]!);
-      } else {
-        xVals = submittedVals["xVals"]!.split(",");
-        yVals = submittedVals["yVals"]!.split(",");
+      List<String> points =
+          submittedVals["dataInput"]!.split(submittedVals["delimiter"]!);
+      for (String point in points) {
+        List<String> xy = point.substring(1, point.length - 1).split(", ");
+        xVals.add(xy[0]);
+        yVals.add(xy[1]);
       }
+    } else if (currentInputType == "x, y list inputs" &&
+        typeData == "bivariate") {
+      xVals = submittedVals["xInput"]!.split(submittedVals["delimiter"]!);
+      yVals = submittedVals["yInput"]!.split(submittedVals["delimiter"]!);
+    } else if (currentInputType == "x, y list inputs" &&
+        typeData == "univariate") {
+      //
+      // Only one set of data passed to backend for univariate data
+      //
+      xVals = submittedVals["xInput"]!.split(submittedVals["delimiter"]!);
+      yVals = [];
+    } else {
+      xVals = submittedVals["xVals"]!.split(",");
+      yVals = submittedVals["yVals"]!.split(",");
+    }
+
+    Map<String, dynamic> validateResult = Validation.dataAnalysis({
+      "xVals": xVals,
+      "yVals": yVals,
+      "dp": submittedVals["dp"],
+      "inputType": currentInputType,
+      "typeData": typeData,
+      "delimiter": submittedVals["delimiter"]
+    });
+
+    if (validateResult["res"]) {
       response = await calculateResult({
         "xVals": xVals,
         "yVals": yVals,
         "dp": submittedVals["dp"],
+        "inputType": currentInputType,
         "typeData": typeData
       });
     }
+
     setState(() {
       if (validateResult["res"]) {
         if (typeData == "bivariate") {
@@ -313,6 +325,9 @@ class DataAnalyserInput extends StatelessWidget {
   final Map<int, dynamic> yTableInput = {};
 
   void onChanged(List<dynamic> params) {
+    //
+    // Dynamically updates map holding values entered into the table input
+    //
     if (params[0][1] == 0) {
       xTableInput[params[0][0]] = params[1];
     } else {
@@ -430,11 +445,14 @@ class DataAnalyserInput extends StatelessWidget {
     List<dynamic> xVals = [];
     List<dynamic> yVals = [];
     for (int key in xTableInput.keys) {
-      xKeys.add(key);
+      if (xTableInput[key] != null && yTableInput[key] != null) {
+        xKeys.add(key);
+        yKeys.add(key);
+      }
     }
-    for (int key in yTableInput.keys) {
-      yKeys.add(key);
-    }
+    //
+    // Sorts pairs from columns to make calculation in backend easier
+    //
     xKeys.sort();
     yKeys.sort();
     for (int key in xKeys) {
@@ -510,7 +528,7 @@ class DataAnalyserInput extends StatelessWidget {
             const Spacer(flex: 1),
             Expanded(
                 flex: 2,
-                child: dpSelect(onDecimalSelect: (String newDp) {
+                child: DpSelect(onDecimalSelect: (String newDp) {
                   inputVals["dp"] = newDp;
                 })),
             const Spacer(flex: 1)

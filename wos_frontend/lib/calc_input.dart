@@ -84,6 +84,7 @@ class CalcInput extends StatelessWidget {
       submittedVals[inputName] = inputVals[inputName].text;
     }
     submittedVals["dp"] = inputVals["dp"];
+    print(submittedVals);
     return submittedVals;
   }
 
@@ -112,7 +113,7 @@ class CalcInput extends StatelessWidget {
                 SizedBox(
                     width: 300,
                     height: 50,
-                    child: dpSelect(
+                    child: DpSelect(
                         onDecimalSelect: (String newDp) =>
                             inputVals["dp"] = newDp))
               ]);
@@ -135,16 +136,16 @@ class CalcInput extends StatelessWidget {
   }
 }
 
-class dpSelect extends StatefulWidget {
+class DpSelect extends StatefulWidget {
   final ValueChanged<String> onDecimalSelect;
 
-  const dpSelect({super.key, required this.onDecimalSelect});
+  const DpSelect({super.key, required this.onDecimalSelect});
 
   @override
-  State<dpSelect> createState() => dpSelectState();
+  State<DpSelect> createState() => DpSelectState();
 }
 
-class dpSelectState extends State<dpSelect> {
+class DpSelectState extends State<DpSelect> {
   String dpValue = "2";
   //
   // Number of decimal places ranges from 0 to 8 inclusive

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wos_frontend/theoryView.dart';
+import 'package:wos_frontend/theory_view.dart';
 
 class InfoSection extends StatelessWidget {
   final String title;

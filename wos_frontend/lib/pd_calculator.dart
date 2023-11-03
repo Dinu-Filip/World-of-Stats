@@ -1,5 +1,5 @@
 import 'package:wos_frontend/calc_input.dart';
-import 'package:wos_frontend/calcOutput.dart';
+import 'package:wos_frontend/calc_output.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -147,6 +147,7 @@ class PDCalculatorState extends State<PDCalculator> {
     }
     Uri uri = Uri.http(baseIP, path, submittedVals);
     var response = await http.get(uri);
+    print(response);
     return jsonDecode(response.body);
   }
 
@@ -193,6 +194,7 @@ class PDCalculatorState extends State<PDCalculator> {
     // Updates each output field showing the method for every calculated
     // result
     //
+    print("res");
     Map<String, String> outputContent = {};
     List<Container> results = [];
     res.forEach((heading, data) {
@@ -227,10 +229,12 @@ class PDCalculatorState extends State<PDCalculator> {
     //
     // Checks inputted fields are valid
     //
+    print(submittedVals);
     Map<String, dynamic> validateResult =
         validationFuncs[widget.distribution]!(submittedVals);
     late Map<String, dynamic> res;
     if (validateResult["res"]) {
+      print("ok");
       res = await calculateResult(submittedVals);
     }
     setState(() {

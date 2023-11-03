@@ -15,6 +15,9 @@ class DiscreteGraph extends StatelessWidget {
     List<BarChartGroupData> bars = [];
     int? lowerX = 0;
     int? upperX = 0;
+    //
+    // Sets limits for cumulative probabilities
+    //
     if (int.tryParse(lower) == null) {
       lowerX = null;
       upperX = int.parse(upper);
@@ -28,7 +31,9 @@ class DiscreteGraph extends StatelessWidget {
     for (String x in barData.keys.toList()) {
       int xVal = int.parse(x);
       double p = double.parse(barData[x]!);
-
+      //
+      // Colours bars within probability region red, other bars are blue
+      //
       if (lowerX == null) {
         if (xVal <= upperX!) {
           bars.add(BarChartGroupData(
@@ -85,9 +90,16 @@ class ContinuousGraph extends StatelessWidget {
 
   LineChartData generateLineData() {
     List<FlSpot> curvePoints = [];
+    //
+    // areaPoints stores the points that define the probability region
+    // The area under these points is rendered pale red
+    //
     List<FlSpot> areaPoints = [];
     double? lowerX = 0;
     double? upperX = 0;
+    //
+    // Sets the limits for cumulative probabilities
+    //
     if (double.tryParse(lower) == null) {
       upperX = double.parse(upper);
       lowerX = null;
@@ -105,6 +117,9 @@ class ContinuousGraph extends StatelessWidget {
       if (p > largestP) {
         largestP = p;
       }
+      //
+      // Checks if point is in probability region and adds to areaPoints
+      //
       if (lowerX == null) {
         if (xVal <= upperX!) {
           areaPoints.add(FlSpot(xVal, p));
@@ -185,11 +200,21 @@ class ScatterGraph extends StatelessWidget {
     }
     double minX = min(xVals);
     double maxX = max(xVals);
-    double slopeVal = double.parse(slope);
-    double interceptVal = double.parse(intercept);
-    FlSpot regressStart = FlSpot(minX, minX * slopeVal + interceptVal);
-    FlSpot regressEnd = FlSpot(maxX, maxX * slopeVal + interceptVal);
-
+    //
+    // Uses calculated regression slope and intercept to plot regression line on scatter chart
+    //
+    FlSpot? regressStart;
+    FlSpot? regressEnd;
+    bool showLine;
+    if (double.tryParse(slope) != null && double.tryParse(intercept) != null) {
+      showLine = true;
+      double slopeVal = double.parse(slope);
+      double interceptVal = double.parse(intercept);
+      regressStart = FlSpot(minX, minX * slopeVal + interceptVal);
+      regressEnd = FlSpot(maxX, maxX * slopeVal + interceptVal);
+    } else {
+      showLine = false;
+    }
     return LineChartData(
         lineBarsData: [
           LineChartBarData(
@@ -200,12 +225,18 @@ class ScatterGraph extends StatelessWidget {
                       FlDotCrossPainter(size: 13, color: Colors.indigo),
                   show: true),
               barWidth: 0),
-          LineChartBarData(
-              spots: [regressStart, regressEnd],
-              show: true,
-              barWidth: 1,
-              dotData: const FlDotData(show: false),
-              color: Colors.black)
+          (() {
+            if (showLine) {
+              return LineChartBarData(
+                  spots: [regressStart!, regressEnd!],
+                  show: true,
+                  barWidth: 1,
+                  dotData: const FlDotData(show: false),
+                  color: Colors.black);
+            } else {
+              return LineChartBarData();
+            }
+          }())
         ],
         titlesData: const FlTitlesData(
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),

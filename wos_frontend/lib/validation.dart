@@ -1,5 +1,8 @@
 class Validation {
   static Map<String, dynamic> binomial(Map<String, String> vals) {
+    //
+    // Ensures that all inputted fields are of the correct data type
+    //
     if (int.tryParse(vals["n"]!) == null) {
       return {
         "res": false,
@@ -15,6 +18,9 @@ class Validation {
     } else {
       int n = int.parse(vals["n"]!);
       double p = double.parse(vals["p"]!);
+      //
+      // Ensures that values are in the correct range
+      //
       if (n <= 0) {
         return {
           "res": false,
@@ -42,6 +48,9 @@ class Validation {
       }
     }
     int n = int.parse(vals["n"]!);
+    //
+    // Validation for probability mass function
+    //
     if (vals.keys.toList().contains("x")) {
       if (int.tryParse(vals["x"]!) == null) {
         return {
@@ -67,6 +76,9 @@ class Validation {
         }
       }
     } else if (vals.keys.toList().contains("x_1")) {
+      //
+      // Validation for cumulative probabilities
+      //
       if (vals["x_1"] == "" && vals["x_2"] == "") {
         return {
           "res": false,
@@ -91,7 +103,7 @@ class Validation {
           if (x_1 >= int.parse(vals["x_2"]!)) {
             return {
               "res": false,
-              "msg": "Lower limit must be smaller than or equal to upper limit",
+              "msg": "Lower limit must be smaller than the upper limit",
               "fields": ["x_1", "x_2"]
             };
           }
@@ -109,12 +121,15 @@ class Validation {
         if (x_2 < 0 || x_2 > n) {
           return {
             "res": false,
-            "msg": "Upeer limit out of range",
+            "msg": "Upper limit out of range",
             "fields": ["x_2", "n"]
           };
         }
       }
     } else if (vals.keys.toList().contains("P")) {
+      //
+      // Validation for inverse function
+      //
       if (double.tryParse(vals["P"]!) == null) {
         return {
           "res": false,
@@ -142,6 +157,9 @@ class Validation {
   }
 
   static Map<String, dynamic> normal(Map<String, String> vals) {
+    //
+    // Ensures fields are valid decimals
+    //
     if (double.tryParse(vals["mu"]!) == null) {
       return {
         "res": false,
@@ -157,13 +175,16 @@ class Validation {
     } else {
       double mu = double.parse(vals["mu"]!);
       double sigma = double.parse(vals["sigma"]!);
+      //
+      // Checks mean is in correct range
+      //
       if (mu < -10000 || mu > 10000) {
         return {
           "res": false,
           "msg": "Mean out of range",
           "fields": ["mu"]
         };
-      } else if (sigma < -1000 || sigma > 1000) {
+      } else if (sigma < 0 || sigma > 1000) {
         return {
           "res": false,
           "msg": "Standard deviation out of range",
@@ -172,6 +193,9 @@ class Validation {
       }
     }
     if (vals.keys.toList().contains("x_1")) {
+      //
+      // Checks at least one limit has been entered
+      //
       if (vals["x_1"] == "" && vals["x_2"] == "") {
         return {
           "res": false,
@@ -192,6 +216,9 @@ class Validation {
       }
       if (vals["x_1"] != "") {
         double x_1 = double.parse(vals["x_1"]!);
+        //
+        // Ensures limits are within valid range
+        //
         if (x_1 < -20000 || x_1 > 20000) {
           return {
             "res": false,
@@ -238,6 +265,9 @@ class Validation {
   }
 
   static Map<String, dynamic> chiSquared(Map<String, String> vals) {
+    //
+    // Checks that the number of degrees of freedom is valid
+    //
     if (int.tryParse(vals["df"]!) == null) {
       return {
         "res": false,
@@ -347,127 +377,128 @@ class Validation {
     return {"res": true};
   }
 
-  static Map<String, dynamic> dataAnalysis(Map<String, String> vals) {
-    String delimiter = "";
-    if (vals["typeData"] == "bivariate") {
-      delimiter = vals["delimiter"]!;
-    } else {
-      delimiter = ",";
+  static Map<String, dynamic> dataAnalysis(Map<String, dynamic> vals) {
+    //
+    // Values in each pair are separated by a comma, so different pairs must be separated
+    // by a different delimiter
+    //
+    if (vals["inputType"] == "(x, y) pairs" && vals["delimiter"] == ",") {
+      return {
+        "res": false,
+        "msg": "For (x, y) pairs, please enter a different delimiter",
+        "fields": ["delimiter"]
+      };
     }
-    if (vals["inputType"] == "x, y list inputs" ||
-        vals["inputType"] == "table input") {
-      String yLbl = "";
-      if (vals["typeData"] == "univariate") {
-        yLbl = "frequency";
-      } else {
-        yLbl = "y";
-      }
-
-      String xVals = vals["xInput"]!;
-      String yVals = vals["yInput"]!;
-      if (xVals == "") {
+    if (vals["delimiter"].contains(r"\")) {
+      return {
+        "res": false,
+        "msg": "Escape characters in delimiter are not allowed"
+      };
+    }
+    //
+    // Second set of values represents the frequency for univariate data and
+    // y values for bivariate data
+    //
+    String yLbl = "";
+    if (vals["typeData"] == "univariate") {
+      yLbl = "frequency";
+    } else {
+      yLbl = "y";
+    }
+    //
+    // Checks whether values for x and y have been inputted
+    // If the input type is univariate then the yVals list will be empty
+    //
+    List<String> xVals = vals["xVals"]!;
+    List<String> yVals = vals["yVals"]!;
+    if (xVals.isEmpty) {
+      return {
+        "res": false,
+        "msg": "At least one x value must be entered",
+        "fields": ["xInput"]
+      };
+    } else if (yVals.isEmpty &&
+        vals["inputType"] != "x, y list inputs" &&
+        vals["typeData"] != "univariate") {
+      return {
+        "res": false,
+        "msg": "At least one $yLbl value must be entered",
+        "fields": ["yInput"]
+      };
+    }
+    //
+    // Ensures that the same number of x and y values were inputted
+    //
+    if (xVals.length != yVals.length &&
+        !(vals["inputType"] != "x, y list inputs" &&
+            vals["typeData"] != "univariate")) {
+      return {
+        "res": false,
+        "msg": "There must be the same number of x and $yLbl values",
+        "fields": ["xInput", "yInput"]
+      };
+    } else if (xVals.length > 50) {
+      return {
+        "res": false,
+        "msg": "Maximum of 50 values can be inputted",
+        "fields": ["xInput", "yInput"]
+      };
+    }
+    //
+    // Checks that all values inputted are valid numbers
+    // Frequency for univariate data must be an integer
+    // y values for bivariate data must be decimal
+    //
+    for (int i = 0; i < xVals.length; i++) {
+      if (double.tryParse(xVals[i]) == null) {
         return {
           "res": false,
-          "msg": "At least one x value must be entered",
-          "fields": ["xInput"]
+          "msg": "${xVals[i]} is not a valid decimal",
         };
-      } else if (yVals == "") {
+      } else if (vals["typeData"] == "bivariate" &&
+          double.tryParse(yVals[i]) == null) {
         return {
           "res": false,
-          "msg": "At least one $yLbl value must be entered",
-          "fields": ["yInput"]
+          "msg": "${yVals[i]} is not a valid decimal",
         };
-      }
-      List<String> splitX = xVals.split(delimiter);
-      List<String> splitY = yVals.split(delimiter);
-      if (splitX.length != splitY.length) {
-        return {
-          "res": false,
-          "msg": "There must be the same number of x and $yLbl values",
-          "fields": ["xInput", "yInput"]
-        };
-      } else if (splitX.length > 50) {
-        return {
-          "res": false,
-          "msg": "Maximum of 50 values can be inputted",
-          "fields": ["xInput", "yInput"]
-        };
-      }
-      for (int i = 0; i < splitX.length; i++) {
-        if (double.tryParse(splitX[i]) == null) {
-          return {
-            "res": false,
-            "msg": "${xVals[i]} is not a valid decimal",
-            "fields": ["xInput"]
-          };
-        } else if (vals["typeData"] == "bivariate" &&
-            double.tryParse(splitY[i]) == null) {
-          return {
-            "res": false,
-            "msg": "${yVals[i]} is not a valid decimal",
-            "fields": ["yInput"]
-          };
-        } else if (vals["typeData"] == "univariate" &&
-            int.tryParse(splitY[i]) == null) {
+      } else if (vals["typeData"] == "univariate" &&
+          vals["inputType"] != "x, y list inputs") {
+        if (int.tryParse(yVals[i]) == null) {
           return {
             "res": false,
             "msg": "${yVals[i]} is not a valid integer",
-            "fields": ["yInput"]
-          };
-        }
-        double x = double.parse(splitX[i]);
-        double y = double.parse(splitY[i]);
-        if (x < -10000 || x > 10000) {
-          return {
-            "res": false,
-            "msg": "${splitX[i]} is out of range",
-            "fields": ["xInput"]
-          };
-        } else if (y < -10000 || y > 10000) {
-          return {
-            "res": false,
-            "msg": "${splitY[i]} is out of range",
-            "fields": ["yInput"]
           };
         }
       }
-    } else if (vals["inputType"] == "(x, y) pairs") {
-      if (vals["dataInput"] == "") {
+
+      double x = double.parse(xVals[i]);
+      //
+      // Checks that each point is in required range
+      //
+      if (x < -10000 || x > 10000) {
         return {
           "res": false,
-          "msg": "At least one point must be inputted",
-          "fields": ["dataInput"]
+          "msg": "${xVals[i]} is out of range",
         };
       }
-      List<String> points = vals["dataInput"]!.split(delimiter);
-      if (vals["typeData"] == "bivariate") {
-        for (String point in points) {
-          String strippedPoint = point.substring(1, point.length - 1);
-          List<String> xy = strippedPoint.split(", ");
-          if (double.tryParse(xy[0]) == null) {
-            return {
-              "res": false,
-              "msg": "${xy[0]} in $point is not a valid decimal",
-              "fields": ["dataInput"]
-            };
-          } else if (double.tryParse(xy[1]) == null) {
-            return {
-              "res": false,
-              "msg": "${xy[1]} in $point is not a valid decimal",
-              "fields": ["dataInput"]
-            };
-          }
+      if (!(vals["typeData"] == "univariate" &&
+          vals["inputType"] == "x, y list inputs")) {
+        double y = double.parse(xVals[i]);
+        if (y < -10000 || y > 10000) {
+          return {
+            "res": false,
+            "msg": "${yVals[i]} is out of range",
+          };
         }
-      } else {
-        for (String point in points) {
-          if (double.tryParse(point) == null) {
-            return {
-              "res": false,
-              "msg": "$point is not a valid decimal",
-              "fields": ["dataInput"]
-            };
-          }
-        }
+      }
+    }
+    //
+    // Ensures that no duplicate x values are given
+    //
+    if (vals["typeData"] == "bivariate" && vals["inputType"] == "table input") {
+      Set<String> tempX = xVals.toSet();
+      if (tempX.length != xVals.length) {
+        return {"res": false, "msg": "There cannot be duplicate x values"};
       }
     }
     return {"res": true};
@@ -497,26 +528,20 @@ class Validation {
       return {
         "res": false,
         "msg": "Number of trials must be valid integer",
-        "fields": ["n"]
+        "fields": ["num_trials"]
       };
     } else if (double.tryParse(submittedVals["prob"]!) == null) {
       return {
         "res": false,
         "msg":
             "Probability of success of the population must be a valid decimal",
-        "fields": "p"
+        "fields": ["prob"]
       };
     } else if (int.tryParse(submittedVals["X"]!) == null) {
       return {
         "res": false,
         "msg": "Number of successes in the sample must be a valid integer",
-        "fields": "X"
-      };
-    } else if (double.tryParse(submittedVals["sig_level"]!) == null) {
-      return {
-        "res": false,
-        "msg": "The significance level must be a valid decimal",
-        "fields": "sig_level"
+        "fields": ["X"]
       };
     } else {
       int n = int.parse(submittedVals["num_trials"]!);
@@ -524,13 +549,13 @@ class Validation {
         return {
           "res": false,
           "msg": "Number of successes must be positive",
-          "fields": "n"
+          "fields": ["num_trials"]
         };
       } else if (n > 10000) {
         return {
           "res": false,
           "msg": "Number of successes out of range",
-          "fields": "n"
+          "fields": ["num_trials"]
         };
       }
       double p = double.parse(submittedVals["prob"]!);
@@ -544,7 +569,7 @@ class Validation {
         return {
           "res": false,
           "msg": "Probability of success cannot be greater than 1",
-          "fields": ["p"]
+          "fields": ["prob"]
         };
       }
       int X = int.parse(submittedVals["X"]!);
@@ -561,11 +586,6 @@ class Validation {
               "The number of successes in the sample cannot be greater than the total number of trials",
           "fields": ["X"]
         };
-      }
-      Map<String, dynamic> sigRes =
-          Validation.sigLevel(submittedVals["sig_level"]!);
-      if (!sigRes["res"]) {
-        return sigRes;
       }
       return {"res": true};
     }
@@ -595,7 +615,7 @@ class Validation {
       return {
         "res": false,
         "msg": "The sample size must be a valid integer",
-        "fields": ["sample_size"]
+        "fields": ["N"]
       };
     } else if (double.tryParse(submittedVals["sig_level"]!) == null) {
       return {
@@ -607,8 +627,7 @@ class Validation {
       double sampleMean = double.parse(submittedVals["sample_mean"]!);
       double populationMean = double.parse(submittedVals["population_mean"]!);
       double populationSd = double.parse(submittedVals["sd"]!);
-      Map<String, dynamic> sigRes =
-          Validation.sigLevel(submittedVals["sig_level"]!);
+      int N = int.parse(submittedVals["N"]!);
       if (populationMean < -100000 || populationMean > 100000) {
         return {
           "res": false,
@@ -628,8 +647,12 @@ class Validation {
           "msg": "Population standard deviation out of range",
           "fields": ["population_sd"]
         };
-      } else if (!sigRes["res"]) {
-        return sigRes;
+      } else if (N < 0 || N > 10000) {
+        return {
+          "res": false,
+          "msg": "Sample size out of range",
+          "fields": ["N"]
+        };
       } else {
         return {"res": true};
       }
@@ -641,21 +664,32 @@ class Validation {
     List<String> xVals = submittedVals["xVals"]!.split(delimiter);
     List<String> expectedVals = submittedVals["observedVals"]!.split(delimiter);
     for (String num in xVals) {
-      if (double.tryParse(num) == null) {
+      if (int.tryParse(num) == null) {
         return {
           "res": false,
-          "msg": "Invalid input in x values field ($num)",
+          "msg": "x value $num must be a valid integer",
           "fields": ["xVals"]
         };
       }
+      int temp = int.parse(num);
+      if (temp < 0) {
+        return {"res": false, "msg": "x value $temp cannot be negative"};
+      } else if (temp > 100000) {
+        return {"res": "x value $temp out of range"};
+      }
     }
     for (String num in expectedVals) {
-      if (double.tryParse(num) == null) {
+      if (int.tryParse(num) == null) {
         return {
           "res": false,
-          "msg": "Invalid input in expected values field ($num)",
-          "fields": ["expectedVals"]
+          "msg": "Observed value $num must be a valid integer",
         };
+      }
+      double temp = double.parse(num);
+      if (temp < 0) {
+        return {"res": false, "msg": "Observed value $temp cannot be negative"};
+      } else if (temp > 100000) {
+        return {"res": false, "msg": "Observed value $temp out of range"};
       }
     }
     if (xVals.length != expectedVals.length) {
@@ -663,31 +697,30 @@ class Validation {
         "res": false,
         "msg":
             "Number of x values must be the same as number of expected values",
-        "fields": ["expectedVals", "xVals"]
       };
     }
     switch (submittedVals["distribution"]) {
-      case "binomial":
-        return Validation.GOFBinomial(submittedVals);
+      case "Binomial":
+        return Validation.gofBinomial(submittedVals);
       default:
         return {"res": true};
     }
   }
 
-  static Map<String, dynamic> GOFBinomial(submittedVals) {
+  static Map<String, dynamic> gofBinomial(submittedVals) {
     String n = submittedVals["n"];
     String p = submittedVals["p"];
+    List<String> xVals =
+        submittedVals["xVals"].split(submittedVals["delimiter"]);
     if (int.tryParse(n) == null) {
       return {
         "res": false,
         "msg": "Number of trials must be a valid integer",
-        "fields": ["n"]
       };
     } else if (double.tryParse(p) == null) {
       return {
         "res": false,
         "msg": "Probability of success must be a valid decimal",
-        "fields": ["p"]
       };
     }
     int nVal = int.parse(n);
@@ -696,13 +729,11 @@ class Validation {
       return {
         "res": false,
         "msg": "Probability of success must be between 0 and 1",
-        "fields": ["p"]
       };
     } else if (nVal <= 0) {
       return {
         "res": false,
         "msg": "Number of trials must be positive",
-        "fields": ["n"]
       };
     } else if (nVal > 10000) {
       return {
@@ -710,6 +741,17 @@ class Validation {
         "msg": "Number of trials out of range",
         "fields": ["n"]
       };
+    }
+    for (String num in xVals) {
+      int temp = int.parse(num);
+      if (temp < 0) {
+        return {"res": false, "msg": "x value $temp must be positive"};
+      } else if (temp > nVal) {
+        return {
+          "res": false,
+          "msg": "x value $temp cannot be greater than the number of trials"
+        };
+      }
     }
     return {"res": true};
   }

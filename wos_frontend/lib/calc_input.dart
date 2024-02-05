@@ -84,7 +84,6 @@ class CalcInput extends StatelessWidget {
       submittedVals[inputName] = inputVals[inputName].text;
     }
     submittedVals["dp"] = inputVals["dp"];
-    print(submittedVals);
     return submittedVals;
   }
 
